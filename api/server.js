@@ -84,6 +84,17 @@ async function moderateWithExistingModel(text) {
  * toxicity or approval fields are trusted. Failure always rejects the write.
  */
 async function moderateText(text, category) {
+  // Lightweight moderation uses no ML model. This is basic anti-spam only,
+  // not a substitute for human review or abuse reporting.
+  if (process.env.MODERATION_PROVIDER === "lightweight") {
+    const value = text.trim();
+    if (/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]/.test(value)) return false;
+    if (/(.)\\1{29,}/u.test(value)) return false;
+    const links = value.match(/https?:\\/\\//gi) || [];
+    if (links.length > 3) return false;
+    if (value.length > 100 && new Set(value.toLowerCase().split(/\\s+/)).size <= 2) return false;
+    return true;
+  }
   if (process.env.MODERATION_PROVIDER === "local-toxic-bert") {
     return moderateWithExistingModel(text);
   }
@@ -285,7 +296,7 @@ app.get("/v1/forum/me", requireUser, async (req, res, next) => {
     res.json({ uid: req.user.uid, isAdmin: admins.has(req.user.uid), banned: data.banned === true, banReason: data.banned === true ? (typeof data.banReason === "string" ? data.banReason : "Banned by moderator") : null, username: typeof data.username === "string" ? data.username : "" });
   } catch (e) { next(e); }
 });
-app.get("/v1/forum/health", (req, res) => res.json({ ok: true, writesEnabled: enableWrites, moderationConfigured: process.env.MODERATION_PROVIDER === "local-toxic-bert" || Boolean(process.env.MODERATION_URL && process.env.MODERATION_API_KEY) }));
+app.get("/v1/forum/health", (req, res) => res.json({ ok: true, writesEnabled: enableWrites, moderationConfigured: ["local-toxic-bert", "lightweight"].includes(process.env.MODERATION_PROVIDER) || Boolean(process.env.MODERATION_URL && process.env.MODERATION_API_KEY) }));
 app.get("/v1/forum/feed", async (req, res, next) => {
   try {
     const [posts, replies] = await Promise.all([
