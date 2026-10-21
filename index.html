@@ -831,6 +831,10 @@ async function loadDeveloperMessage(){
 
 function formatJoinDate(value){
  if(!value) return 'unavailable';
+ if(typeof value === 'number'){
+   const date = new Date(value < 1e11 ? value * 1000 : value);
+   return Number.isNaN(date.getTime()) ? 'unavailable' : date.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+ }
  if(typeof value === 'string'){
    const parsed = new Date(value);
    return isNaN(parsed.getTime()) ? 'unavailable' : parsed.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
