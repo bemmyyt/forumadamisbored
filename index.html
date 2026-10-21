@@ -668,7 +668,7 @@ async function loadPosts(){
    div.innerHTML = `
   <div style="display:flex;align-items:center">
     <img src="${safeAvatarUrl(avatarUrl, 'https://www.gravatar.com/avatar/?d=mp&s=80')}" class="avatar" alt="avatar">
-    <div style="margin-left:8px"><b><a href="#" onclick="openProfile('${data.uid || ''}');return false;">${escapeHtml(displayName)}</a></b>${badgesHtml}</div>
+    <div style="margin-left:8px"><b><a href="#" onclick="openProfile('${/^[A-Za-z0-9]{1,128}$/.test(data.uid || '') ? data.uid : ''}');return false;">${escapeHtml(displayName)}</a></b>${badgesHtml}</div>
   </div>
   <div class="meta">${timeAgo(data.createdAt || "timestamp not available")}</div>
   <div style="margin:8px 0">${escapeHtml(data.text || "text not available")}</div>
@@ -816,7 +816,7 @@ async function loadDeveloperMessage(){
       div.style.animationDelay = `${index * 0.1}s`;
       div.innerHTML = `
         <div><b>message from the developer</b></div>
-        <div style="margin:8px 0">${message}</div>`;
+        <div style="margin:8px 0">${escapeHtml(message)}</div>`;
       container.appendChild(div);
     });
   }catch(e){
@@ -1377,7 +1377,7 @@ setTimeout(() => {
      document.getElementById("posts").innerHTML = `
        <div class="post">
          <b>you have been banned.</b>
-         <div style="margin:8px 0">${banReason.message}</div>
+         <div style="margin:8px 0">${escapeHtml(banReason.message)}</div>
        </div>
      `;
      document.getElementById("postBtn").disabled = true;
