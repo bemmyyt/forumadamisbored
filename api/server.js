@@ -15,6 +15,18 @@ app.use(cors({ origin(origin, cb) { cb(null, !origin || origins.includes(origin)
 app.use(express.json({ limit: "16kb" }));
 app.use("/v1/forum", rateLimit({ windowMs: 60_000, limit: 60, standardHeaders: "draft-7", legacyHeaders: false }));
 
+// Separate write limits protect Firestore from bursts without running an AI model.
+// These limits are per client IP; the existing 60/min global limit still applies.
+const writeLimit = (limit, message) => rateLimit({
+  windowMs: 60_000, limit, standardHeaders: "draft-7", legacyHeaders: false,
+  message: { error: message }
+});
+const postLimiter = writeLimit(5, "Too many posts. Try again in a minute");
+const replyLimiter = writeLimit(12, "Too many replies. Try again in a minute");
+const dmLimiter = writeLimit(15, "Too many messages. Try again in a minute");
+const profileLimiter = writeLimit(6, "Too many profile changes. Try again in a minute");
+const adminWriteLimiter = writeLimit(10, "Too many moderation actions. Try again in a minute");
+
 const err = (res, status, message) => res.status(status).json({ error: message });
 const visibleContent = d => !d.moderationStatus || d.moderationStatus === "approved";
 const publicPost = d => ({
@@ -158,7 +170,7 @@ app.get("/v1/forum/dms", requireUser, async (req, res, next) => {
 });
 
 
-app.post("/v1/forum/dms", writingEnabled, requireUser, async (req, res, next) => {
+app.post("/v1/forum/dms", writingEnabled, requireUser, dmLimiter, async (req, res, next) => {
   try {
     const { recipientUid, text } = req.body || {};
     if (typeof recipientUid !== "string" || !/^[a-zA-Z0-9]{1,128}$/.test(recipientUid)
@@ -181,7 +193,7 @@ app.post("/v1/forum/dms", writingEnabled, requireUser, async (req, res, next) =>
 });
 
 // Profile writes are owned by the API; clients cannot set ban/admin fields.
-app.post("/v1/forum/me/profile", writingEnabled, requireUser, async (req, res, next) => {
+app.post("/v1/forum/me/profile", writingEnabled, requireUser, profileLimiter, async (req, res, next) => {
   try {
     const body = req.body || {};
     if (!body || typeof body !== "object" || Array.isArray(body) ||
@@ -326,7 +338,7 @@ app.get("/v1/forum/replies", async (req, res, next) => {
     res.json({ replies: snap.docs.filter(d => visibleContent(d.data())).map(d => ({ id: d.id, ...publicReply(d.data()) })) });
   } catch (e) { next(e); }
 });
-app.post("/v1/forum/posts", writingEnabled, requireUser, async (req, res, next) => {
+app.post("/v1/forum/posts", writingEnabled, requireUser, postLimiter, async (req, res, next) => {
   try {
     const { text } = req.body || {};
     if (!validText(text)) return err(res, 400, "Post text must contain 1–3000 characters");
@@ -339,7 +351,7 @@ app.post("/v1/forum/posts", writingEnabled, requireUser, async (req, res, next) 
     res.status(201).json({ id: ref.id });
   } catch (e) { next(e); }
 });
-app.post("/v1/forum/replies", writingEnabled, requireUser, async (req, res, next) => {
+app.post("/v1/forum/replies", writingEnabled, requireUser, replyLimiter, async (req, res, next) => {
   try {
     const { postId, text } = req.body || {};
     if (typeof postId !== "string" || !/^[a-zA-Z0-9]{1,100}$/.test(postId) || !validText(text))
@@ -354,7 +366,7 @@ app.post("/v1/forum/replies", writingEnabled, requireUser, async (req, res, next
     res.status(201).json({ id: ref.id });
   } catch (e) { next(e); }
 });
-app.delete("/v1/forum/posts/:id", writingEnabled, requireUser, async (req, res, next) => {
+app.delete("/v1/forum/posts/:id", writingEnabled, requireUser, adminWriteLimiter, async (req, res, next) => {
   try {
     const id = req.params.id;
     if (!/^[a-zA-Z0-9]{1,100}$/.test(id)) return err(res, 400, "Invalid post ID");
@@ -383,7 +395,7 @@ app.get("/v1/forum/admin/users", requireUser, requireAdmin, async (req, res, nex
     }) });
   } catch (e) { next(e); }
 });
-app.post("/v1/forum/admin/users/:uid/ban", writingEnabled, requireUser, requireAdmin, async (req, res, next) => {
+app.post("/v1/forum/admin/users/:uid/ban", writingEnabled, requireUser, requireAdmin, adminWriteLimiter, async (req, res, next) => {
   try {
     const uid = req.params.uid;
     if (!/^[a-zA-Z0-9]{1,128}$/.test(uid) || uid === req.user.uid || admins.has(uid))
@@ -397,7 +409,7 @@ app.post("/v1/forum/admin/users/:uid/ban", writingEnabled, requireUser, requireA
     res.json({ ok: true });
   } catch (e) { next(e); }
 });
-app.post("/v1/forum/admin/users/:uid/unban", writingEnabled, requireUser, requireAdmin, async (req, res, next) => {
+app.post("/v1/forum/admin/users/:uid/unban", writingEnabled, requireUser, requireAdmin, adminWriteLimiter, async (req, res, next) => {
   try {
     const uid = req.params.uid;
     if (!/^[a-zA-Z0-9]{1,128}$/.test(uid)) return err(res, 400, "Invalid user UID");
@@ -407,7 +419,7 @@ app.post("/v1/forum/admin/users/:uid/unban", writingEnabled, requireUser, requir
     res.json({ ok: true });
   } catch (e) { next(e); }
 });
-app.delete("/v1/forum/admin/replies/:id", writingEnabled, requireUser, requireAdmin, async (req, res, next) => {
+app.delete("/v1/forum/admin/replies/:id", writingEnabled, requireUser, requireAdmin, adminWriteLimiter, async (req, res, next) => {
   try {
     const id = req.params.id;
     if (!/^[a-zA-Z0-9]{1,100}$/.test(id)) return err(res, 400, "Invalid reply ID");
