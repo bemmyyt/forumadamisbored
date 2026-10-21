@@ -90,8 +90,8 @@ async function moderateText(text, category) {
     const value = text.trim();
     if (/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]/.test(value)) return false;
     if (/(.)\\1{29,}/u.test(value)) return false;
-    const links = value.match(/https?:\\/\\//gi) || [];
-    if (links.length > 3) return false;
+    const links = value.split("http://").length - 1 + value.split("https://").length - 1;
+    if (links > 3) return false;
     if (value.length > 100 && new Set(value.toLowerCase().split(/\\s+/)).size <= 2) return false;
     return true;
   }
