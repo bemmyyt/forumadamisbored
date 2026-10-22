@@ -284,7 +284,18 @@ app.get("/v1/forum/profiles/:uid", async (req, res, next) => {
     if (!/^[a-zA-Z0-9]{1,128}$/.test(uid)) return err(res, 400, "Invalid UID");
     const doc = await db.collection("users").doc(uid).get();
     if (!doc.exists) return err(res, 404, "Profile not found");
-    res.json({ profile: profileProjection(doc.id, doc.data()) });
+    const profile = profileProjection(doc.id, doc.data());
+    if (!profile.createdAt) {
+      try {
+        const userRecord = await admin.auth().getUser(uid);
+        const creationTime = Date.parse(userRecord.metadata.creationTime);
+        if (Number.isFinite(creationTime)) profile.createdAt = creationTime;
+      } catch (error) {
+        // Legacy or deleted Auth accounts may have no available creation date.
+        console.warn("Auth join date unavailable for profile", error.code || error.message);
+      }
+    }
+    res.json({ profile });
   } catch(e) { next(e); }
 });
 app.get("/v1/forum/username/:name", async (req, res, next) => {
