@@ -622,17 +622,28 @@ async function loadPosts(){
  });
 
  const currentUsername = auth.currentUser ? await getUsername(auth.currentUser.uid) : null;
+ const authorProfiles = new Map();
+ async function getAuthorProfile(uid){
+   if(!uid || !/^[A-Za-z0-9]{1,128}$/.test(uid)) return null;
+   if(!authorProfiles.has(uid)){
+     authorProfiles.set(uid, getPublicForumProfile(uid).catch(error => {
+       console.warn('Author profile unavailable', error);
+       return null;
+     }));
+   }
+   return authorProfiles.get(uid);
+ }
  const postPromises = snap.docs.map(async (postDoc) => {
    const data = postDoc.data();
    const div = document.createElement("div");
    div.className = "post";
    div.style.animationDelay = `${Math.min(snap.docs.indexOf(postDoc) * 0.05, 1)}s`;
 
-   let avatarUrl = 'https://www.gravatar.com/avatar/?d=mp&s=80';
+   let avatarUrl = data.avatar || 'https://www.gravatar.com/avatar/?d=mp&s=80';
    let displayName = data.user || 'unknown user';
    let badgesHtml = '';
    try{
-     const pd = await getPublicForumProfile(data.uid || '');
+     const pd = await getAuthorProfile(data.uid || '');
      if(pd){
        if(pd.banned){
          return;
@@ -645,15 +656,18 @@ async function loadPosts(){
    }catch(e){console.error('profile load failed', e);} 
 
    const postReplies = repliesByPost[postDoc.id] || [];
+   const replyProfiles = await Promise.all(postReplies.map(r => getAuthorProfile(r.uid || '')));
    const moderationLabel = data.toxic === true
      ? '<div class="meta post-moderation">⚠︎ This message may violate the Terms of Use.</div>'
      : '';
    let repliesHtml = '<div class="replies">';
-   for(const r of postReplies){
+   for(const [replyIndex, r] of postReplies.entries()){
+     const replyProfile = replyProfiles[replyIndex];
+     const replyAvatar = replyProfile?.avatar || r.avatar;
      repliesHtml += `
        <div class="reply">
          <div style="display:flex;align-items:center">
-           <img src="${safeAvatarUrl(r.avatar, 'https://www.gravatar.com/avatar/?d=mp&s=48')}" class="avatar" alt="avatar">
+           <img src="${safeAvatarUrl(replyAvatar, 'https://www.gravatar.com/avatar/?d=mp&s=48')}" class="avatar" alt="avatar">
            <div style="margin-left:8px"><b>${escapeHtml(r.user || 'unknown')}</b> <span class="meta">${r.createdAt? timeAgo(r.createdAt): ''}</span></div>
          </div>
          <div style="margin-top:6px">${escapeHtml(r.text || '')}</div>
