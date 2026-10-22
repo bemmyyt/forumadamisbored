@@ -604,40 +604,26 @@ async function loadPosts(){
  }
  const viewerUsername = auth.currentUser ? await getUsername(auth.currentUser.uid) : null;
 
- // Staged API feed: opt-in with ?forumApiPreview=1; live mode stays unchanged.
- let snap, repliesSnap;
- if (new URLSearchParams(location.search).get("forumApiPreview") === "1") {
-   try {
-     const response = await fetch("https://api.adamisbored.xyz/v1/forum/feed", { signal: AbortSignal.timeout(5000) });
-     if (!response.ok) throw new Error("API unavailable");
-     const feed = await response.json();
-     if (!Array.isArray(feed.posts) || !Array.isArray(feed.replies)) throw new Error("Invalid API feed");
-     const snapshot = (items) => ({ docs: items.map(item => ({
-       id: item.id, data: () => item
-     })), forEach(callback) { this.docs.forEach(callback); } });
-     snap = snapshot(feed.posts);
-     repliesSnap = snapshot(feed.replies);
-     window.__forumApiReadOnly = false;
-   } catch (error) {
-     snap = await getDocs(collection(db,"posts"));
-     repliesSnap = await getDocs(collection(db,'replies'));
-     window.__forumApiReadOnly = true;
-   }
-   let notice = document.getElementById("forumApiPreviewNotice");
-   if (!notice) {
-     notice = document.createElement("div");
-     notice.id = "forumApiPreviewNotice";
-     notice.style.cssText = "padding:12px;margin:10px 0;border:1px solid #b9a47a;border-radius:8px;background:#fff8e5;color:#403318";
-     container.before(notice);
-   }
-   notice.textContent = window.__forumApiReadOnly
-     ? "API unavailable — public feed fallback (read-only preview)."
-     : "API feed preview — posts, replies and deletions are disabled while testing.";
- } else {
-   snap = await getDocs(collection(db,"posts"));
-   repliesSnap = await getDocs(collection(db,'replies'));
- }
- // Legacy documents without a moderationStatus remain visible; never show rejected/pending items.
+ // Use the VPS API as the authoritative source of posts and replies.
+  // Never silently fall back to direct Firestore reads.
+  let snap, repliesSnap;
+  try {
+    const response = await fetch("https://api.adamisbored.xyz/v1/forum/feed", {signal:AbortSignal.timeout(10000)});
+    if(!response.ok) throw new Error("API feed failed (" + response.status + ")");
+    const feed = await response.json();
+    if(!Array.isArray(feed.posts) || !Array.isArray(feed.replies)) throw new Error("Invalid API feed");
+    const snapshot = items => ({
+      docs: items.map(item => ({id:item.id,data:()=>item})),
+      forEach(callback){this.docs.forEach(callback);}
+    });
+    snap = snapshot(feed.posts);
+    repliesSnap = snapshot(feed.replies);
+  } catch(error) {
+    console.error("Forum feed unavailable",error);
+    container.innerHTML = '<div class="post"><b>Posts are temporarily unavailable.</b><div>Please try again in a moment.</div></div>';
+    return;
+  }
+  // Legacy documents without a moderationStatus remain visible; never show rejected/pending items.
  const visibleForumDoc = d => !d.moderationStatus || d.moderationStatus === "approved";
  snap = { ...snap, docs: snap.docs.filter(d => visibleForumDoc(d.data())) };
  repliesSnap = { ...repliesSnap,
@@ -728,7 +714,7 @@ async function loadPosts(){
       deleteBtn.textContent = "Delete";
 
       deleteBtn.onclick = async () => {
-         if (new URLSearchParams(location.search).get("forumApiPreview") === "1") { alert("API preview is read-only."); return; }
+
          const token = await auth.currentUser.getIdToken();
          const response = await fetch("https://api.adamisbored.xyz/v1/forum/posts/" +
            encodeURIComponent(postDoc.id), {method:"DELETE",headers:{"Authorization":"Bearer "+token}});
@@ -1216,7 +1202,7 @@ onAuthStateChanged(auth, async (user2) => {
 // a startup timer must never overwrite content after a successful sign-in.
 
 postBtn.onclick = async ()=>{
- if (new URLSearchParams(location.search).get("forumApiPreview") === "1") { alert("API preview is read-only. Posting is disabled."); return; }
+
  if(!auth.currentUser){
         document.getElementById("posts").innerHTML = `
   <div class="post">
@@ -1502,9 +1488,19 @@ document.getElementById("searchBtn").onclick = async () => {
  results.innerHTML="";
  if(!username) return;
 
- const snap=await getDocs(collection(db,"posts"));
+ let feed;
+ try {
+   const response = await fetch("https://api.adamisbored.xyz/v1/forum/feed", {signal:AbortSignal.timeout(10000)});
+   if(!response.ok) throw new Error("Could not load posts (" + response.status + ")");
+   feed = await response.json();
+   if(!Array.isArray(feed.posts)) throw new Error("Invalid feed");
+ } catch(error) {
+   results.textContent = error.message || "Could not load posts.";
+   return;
+ }
+ const posts = feed.posts.map(item => ({id:item.id,data:()=>item}));
 
- snap.forEach(post=>{
+ posts.forEach(post=>{
    const data=post.data();
    if(data.user!==username) return;
 
@@ -1979,7 +1975,7 @@ window.openReplyBox = function(postId){
 };
 
 window.submitReply = async function(postId){
-  if (new URLSearchParams(location.search).get("forumApiPreview") === "1") { alert("API preview is read-only. Replies are disabled."); return; }
+
   if(!auth.currentUser){ alert('please log in to reply'); return; }
   const input = document.getElementById(`replyInput-${postId}`);
   if(!input) return;
