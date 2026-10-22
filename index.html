@@ -854,8 +854,16 @@ function formatJoinDate(value){
    const parsed = new Date(value);
    return isNaN(parsed.getTime()) ? 'unavailable' : parsed.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
  }
- if(value.toDate){
-   return value.toDate().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+ if(typeof value === 'object'){
+   const seconds = value.seconds ?? value._seconds;
+   if(typeof seconds === 'number' && Number.isFinite(seconds)){
+     const date = new Date(seconds * 1000);
+     return Number.isNaN(date.getTime()) ? 'unavailable' : date.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+   }
+ }
+ if(typeof value.toDate === 'function'){
+   const date = value.toDate();
+   return Number.isNaN(date.getTime()) ? 'unavailable' : date.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
  }
  if(value instanceof Date){
    return value.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
