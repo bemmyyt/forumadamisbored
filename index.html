@@ -197,6 +197,20 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
 @media(max-width:600px){body{padding:24px 14px 42px!important}h1{font-size:56px}.post{padding:16px!important}.popup-content{padding:20px!important}.dm-sidebar{max-height:34%}.dm-panel{inset:7px!important}.dm-header{gap:10px}.dm-header h3{font-size:17px}.replies{margin-left:8px}#postInput{max-width:calc(100% - 105px)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+/* Keep the policy dialog compact while allowing its content to scroll. */
+#policyMenu .policy-content{
+  width:min(90%,520px);
+  max-width:520px;
+  max-height:min(520px,calc(100dvh - 40px));
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+@media(max-width:600px){
+  #policyMenu .policy-content{
+    width:100%;
+    max-height:min(480px,calc(100dvh - 32px));
+  }
+}
 /* Keep the original post design; only the feed scrolls independently. */
 #posts{
   max-height:clamp(360px,65dvh,800px);
@@ -270,7 +284,7 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
 <button onclick="openPolicy()">Privacy Policy &amp; Terms of Use</button>
 
 <div id="policyMenu" class="popup">
-  <div class="popup-content">
+  <div class="popup-content policy-content">
     <h2>Privacy Policy</h2>
     <p><strong>Last updated: October 22, 2026</strong></p>
     <p>This policy explains how the Adam Is Bored Forum (forum.adamisbored.xyz) handles information when you use the forum.</p>
