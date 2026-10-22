@@ -197,24 +197,13 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
 @media(max-width:600px){body{padding:24px 14px 42px!important}h1{font-size:56px}.post{padding:16px!important}.popup-content{padding:20px!important}.dm-sidebar{max-height:34%}.dm-panel{inset:7px!important}.dm-header{gap:10px}.dm-header h3{font-size:17px}.replies{margin-left:8px}#postInput{max-width:calc(100% - 105px)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
-/* Compact, independently scrollable feed: navigation and composer stay on the page. */
-.feed-shell{margin-top:17px;border:1px solid #304861;border-radius:18px;background:#0d192b;box-shadow:0 12px 36px #02091555;overflow:hidden}
-.feed-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 17px;border-bottom:1px solid #304861;background:#15263e}
-.feed-header strong{font-size:14px;letter-spacing:.01em;color:#e8f3ff}
-.feed-header span{font-size:12px;color:#9fb5cf}
-#posts{height:clamp(340px,62dvh,760px);overflow-y:auto;overscroll-behavior:contain;padding:7px 12px 12px;scrollbar-color:#49698d #101e32;scrollbar-width:thin}
-#posts .post{padding:13px 15px!important;margin:9px 0!important;border-radius:13px!important;box-shadow:0 3px 12px #02091536!important;overflow-wrap:anywhere}
-#posts .post:hover{transform:none!important;box-shadow:0 5px 16px #02091555!important}
-#posts .post .avatar{width:38px;height:38px;margin-right:9px;flex-shrink:0}
-#posts .post .meta{font-size:11px}
-#posts .post button{min-height:32px!important;padding:5px 11px!important;font-size:12px}
-#posts .post .replies{margin:9px 0 0 0;padding-top:6px}
-#posts .post .reply{padding:7px 10px;margin:6px 0}
-#posts .post .reply .avatar{width:27px;height:27px}
-@media(max-width:600px){
- .feed-header{padding:10px 12px}
- #posts{height:clamp(320px,60dvh,650px);padding:5px 8px 10px}
- #posts .post{padding:11px!important;margin:7px 0!important}
+/* Keep the original post design; only the feed scrolls independently. */
+#posts{
+  max-height:clamp(360px,65dvh,800px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-color:#49698d #101e32;
+  scrollbar-width:thin;
 }
 </style>
 </head>
@@ -256,8 +245,6 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
 <input id="postInput" placeholder="write something!" aria-label="Write a post" maxlength="2000" autocomplete="off">
 <button id="postBtn">Post</button><span id="postHint" class="post-hint" aria-live="polite"></span>
 
-<section class="feed-shell" aria-label="Forum feed">
-  <div class="feed-header"><strong>Recent posts</strong><span>Scroll here to browse</span></div>
 <div id="posts" role="feed" aria-label="Posts" tabindex="0">
   <div class="post" style="animation-delay: 0s;">
     <div><b>loading...</b></div>
@@ -265,7 +252,6 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
     <div style="margin:8px 0">loading posts, please wait...</div>
   </div>
 </div>
-</section>
 
 <hr>
 <div id="adminPanel" style="display: none; border: 2px solid rgb(136, 136, 136); padding: 10px; margin-top: 15px;">
