@@ -265,7 +265,25 @@ input:focus,textarea:focus{background:#191d24!important;border-color:#93b4df!imp
 #adminPanel{background:#1b1f26!important;border:1px solid #414852!important;border-radius:9px!important}
 a{color:#b5d1f5!important}a:hover{color:#d8e8ff!important}
 @media(max-width:600px){body{padding:18px 12px 32px!important}h1{font-size:30px!important}.post{padding:12px!important}.popup-content{padding:16px!important}.replies{margin-left:0!important}#postInput{max-width:calc(100% - 92px)!important}.dm-panel{inset:5px!important}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+/* Bring back warmth and purposeful motion without visual clutter. */
+body{background:#0c1422!important;color:#edf3fa!important}
+body:before{display:block!important;background:radial-gradient(ellipse 70% 45% at 70% -10%,#24528a35,transparent 78%),radial-gradient(ellipse 55% 60% at -15% 80%,#183e6530,transparent 78%)!important}
+h1{color:#f2f7ff!important}
+.post{background:linear-gradient(145deg,#19283a,#152234)!important;border-color:#344a61!important;animation:humanPostIn .35s ease both!important;transition:background .18s,border-color .18s,box-shadow .18s,transform .18s!important}
+.post:hover{background:linear-gradient(145deg,#1d3046,#192a3e)!important;border-color:#547394!important;transform:translateY(-2px)!important;box-shadow:0 8px 24px #030a1540!important}
+@keyframes humanPostIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+button{transition:background .16s,border-color .16s,transform .16s!important}
+button:hover:not(:disabled){transform:translateY(-1px)!important}
+button:active:not(:disabled){transform:translateY(0)!important}
+#postBtn{background:linear-gradient(135deg,#bcd8ff,#8dbaf0)!important;border-color:#b1d2ff!important}
+#postBtn:hover:not(:disabled){background:linear-gradient(135deg,#d0e5ff,#a9cffa)!important}
+.reply{background:#1d2b3d!important;border-left-color:#7ba9df!important}
+.popup-content{background:linear-gradient(155deg,#203148,#172438)!important;animation:humanDialogIn .2s ease-out both!important}
+@keyframes humanDialogIn{from{opacity:0;transform:translate(-50%,-48%) scale(.985)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.dm-thread-item{transition:background .15s,border-color .15s!important}
+.dm-bubble{background:#24364c!important}
+.dm-message.me .dm-bubble{background:#315a85!important}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.post,.post:hover{opacity:1!important;transform:none!important}.popup-content{opacity:1!important;transform:translate(-50%,-50%)!important}}
 </style>
 </head>
 <body>
