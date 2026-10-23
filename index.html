@@ -284,6 +284,36 @@ button:active:not(:disabled){transform:translateY(0)!important}
 .dm-bubble{background:#24364c!important}
 .dm-message.me .dm-bubble{background:#315a85!important}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.post,.post:hover{opacity:1!important;transform:none!important}.popup-content{opacity:1!important;transform:translate(-50%,-50%)!important}}
+
+/* Consistent forum design system: one palette, spacing scale and motion language. */
+:root{--forum-bg:#0c1422;--forum-surface:#18283b;--forum-surface-hover:#20344b;--forum-raised:#22364d;--forum-border:#3a526b;--forum-text:#edf4fd;--forum-muted:#a6bad0;--forum-accent:#8bbdf7;--forum-radius:10px;--forum-speed:180ms;--forum-ease:cubic-bezier(.2,.8,.2,1)}
+body{background:var(--forum-bg)!important;color:var(--forum-text)!important}
+body:before{display:block!important}
+button,input,textarea,.post,.reply,.popup-content,.dm-panel,.dm-thread-item,.dm-bubble,#adminPanel{font-family:inherit!important}
+button{border-radius:8px!important;background:#243850!important;border:1px solid var(--forum-border)!important;color:var(--forum-text)!important;box-shadow:none!important;transition:background var(--forum-speed) var(--forum-ease),border-color var(--forum-speed) var(--forum-ease),transform var(--forum-speed) var(--forum-ease)!important}
+button:hover:not(:disabled){background:#31506f!important;border-color:#7296ba!important;transform:translateY(-2px)!important}
+button:active:not(:disabled){transform:translateY(0) scale(.98)!important}
+#postBtn{background:linear-gradient(135deg,#7fb4f3,#a6d0ff)!important;color:#0e2138!important;border-color:#b4d8ff!important}
+#postBtn:hover:not(:disabled){background:linear-gradient(135deg,#a1caff,#c2e0ff)!important}
+input,textarea{border-radius:8px!important;background:#111f30!important;border-color:var(--forum-border)!important;transition:border-color var(--forum-speed),box-shadow var(--forum-speed)!important}
+input:focus,textarea:focus{border-color:var(--forum-accent)!important;box-shadow:0 0 0 3px #8bbdf725!important}
+.post{border-radius:var(--forum-radius)!important;border-color:var(--forum-border)!important;background:linear-gradient(145deg,#1a2a3d,#152336)!important;animation:forumAppear 360ms var(--forum-ease) both!important;transition:transform var(--forum-speed) var(--forum-ease),border-color var(--forum-speed),box-shadow var(--forum-speed),background var(--forum-speed)!important}
+.post:hover{transform:translateY(-3px)!important;border-color:#6686a9!important;box-shadow:0 10px 26px #030b1a55!important}
+@keyframes forumAppear{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.reply{background:#203148!important;border:1px solid #3a526b!important;border-left:3px solid var(--forum-accent)!important;border-radius:8px!important}
+.popup-content{background:linear-gradient(150deg,#22354b,#17263a)!important;border:1px solid var(--forum-border)!important;border-radius:var(--forum-radius)!important}
+.dm-panel,#adminPanel{background:#162437!important;border-color:var(--forum-border)!important;border-radius:var(--forum-radius)!important}
+.dm-header,.dm-thread-header,.dm-composer{background:#21334a!important;border-color:var(--forum-border)!important}
+.dm-sidebar,.dm-thread,.dm-messages{background:#172639!important}
+.dm-thread-item{border-radius:8px!important;transition:background var(--forum-speed),border-color var(--forum-speed),transform var(--forum-speed)!important}
+.dm-thread-item:hover{background:#2a4059!important;transform:translateX(2px)}
+.dm-thread-item.active{background:#315170!important;border-color:#7aa8d7!important}
+.dm-bubble{background:#263b54!important;border-radius:9px!important}
+.dm-message.me .dm-bubble{background:#315f8c!important}
+a{color:#a9d1ff!important;transition:color var(--forum-speed)!important}
+a:hover{color:#e0efff!important}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #a5d1ff!important;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.post,.post:hover{opacity:1!important;transform:none!important}.popup-content{opacity:1!important;transform:translate(-50%,-50%)!important}}
 </style>
 </head>
 <body>
