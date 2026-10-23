@@ -583,10 +583,21 @@ async function ensureUsername(user){
  return username;
 }
 
+function showPostStatus(title, message) {
+ const container = document.getElementById("posts");
+ container.innerHTML = `
+   <div class="post" style="animation-delay:0s;">
+     <div><b>${escapeHtml(title)}</b></div>
+     <div class="meta"></div>
+     <div style="margin:8px 0">${escapeHtml(message)}</div>
+   </div>`;
+ updateLanguage();
+}
+
 async function loadPosts(){
  const container = document.getElementById("posts");
  const viewerUid=auth.currentUser?.uid;
- container.textContent="Loading posts…";
+ showPostStatus("loading...", "loading posts, please wait...");
  // If the current viewer is banned, stop and show banned message
  if(auth.currentUser){
    try{
@@ -750,7 +761,7 @@ async function loadPosts(){
  const renderedPosts=await Promise.all(postPromises);
  if(auth.currentUser?.uid!==viewerUid)return;
  container.replaceChildren(...renderedPosts.filter(Boolean));
- if(!renderedPosts.some(Boolean))container.textContent='No posts yet.';
+ if(!renderedPosts.some(Boolean))showPostStatus('no posts yet', 'Be the first to post!');
  
  // Always retranslate after posts load to ensure consistency
  setTimeout(() => {
@@ -1183,12 +1194,12 @@ console.log("wsg login text")
 
         loadPosts().catch(error=>{
           console.error('Failed to load forum posts',error);
-          document.getElementById('posts').textContent='Could not load posts. Please refresh or try again later.';
+          showPostStatus('could not load posts', 'Please refresh or try again later.');
         });
     } else {
         statusElement.textContent =
             "Not logged in.";
-        document.getElementById('posts').textContent='Sign in to view forum posts.';
+        showPostStatus('not logged in', 'Sign in to view forum posts.');
         document.getElementById("adminPanel").style.display = "none";
     }
 });
