@@ -1,0 +1,35 @@
+// Candidate rules for API-first migration. DO NOT deploy before validating
+// existing account initialization, profiles, and API readiness in emulator.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+    function safeProfileKeys() {
+      return ['username', 'avatar', 'bio', 'createdAt'];
+    }
+    match /posts/{postId} {
+      allow read: if resource.data.get('moderationStatus', 'approved') == 'approved';
+      allow write: if false;
+    }
+    match /replies/{replyId} {
+      allow read: if resource.data.get('moderationStatus', 'approved') == 'approved';
+      allow write: if false;
+    }
+    match /directMessages/{messageId} {
+      allow get, list: if signedIn() &&
+        (resource.data.senderUid == request.auth.uid ||
+         resource.data.recipientUid == request.auth.uid);
+      allow write: if false;
+    }
+    match /users/{uid} {
+      // Account documents may contain email, ban status and internal flags.
+      // Clients use /v1/forum/me and sanitized public profile API instead.
+      allow read: if false;
+      // All profile writes now go through the verified API.
+      allow create, update: if false;
+      allow delete: if false;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

@@ -1,0 +1,42 @@
+name: Forum API checks
+on:
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'index.html'
+      - '.github/workflows/forum-api-checks.yml'
+  push:
+    branches:
+      - 'chatgpt/forum-api-migration-v2'
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check API JavaScript syntax
+        run: node --check api/server.js
+      - name: Run security contract tests
+        run: node --test api/test/*.test.js
+      - name: Validate package metadata
+        run: node -e "JSON.parse(require('fs').readFileSync('api/package.json','utf8'))"
+      - name: Check inline module JavaScript syntax
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const html = fs.readFileSync('index.html','utf8');
+          const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+          let checked = 0;
+          for (const [, attrs, code] of scripts) {
+            if (!code.trim() || /\bsrc\s*=/.test(attrs)) continue;
+            const { spawnSync } = require('child_process');
+            const isModule = /\btype\s*=\s*["']module["']/i.test(attrs);
+            const result = spawnSync('node', ['--check', ...(isModule ? ['--input-type=module'] : [])], {input:code,encoding:'utf8'});
+            if(result.status !== 0){ process.stderr.write(result.stderr);process.exit(1); }
+            checked++;
+          }
+          if (!checked) throw Error('No inline scripts found');
+          console.log('Checked',checked,'inline scripts');
+          NODE

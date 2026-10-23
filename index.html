@@ -196,6 +196,29 @@ input:focus,textarea:focus{border-color:#74baff!important;background:#10213a!imp
 a{color:#8cc7ff}a:hover{color:#c1e3ff}
 @media(max-width:600px){body{padding:24px 14px 42px!important}h1{font-size:56px}.post{padding:16px!important}.popup-content{padding:20px!important}.dm-sidebar{max-height:34%}.dm-panel{inset:7px!important}.dm-header{gap:10px}.dm-header h3{font-size:17px}.replies{margin-left:8px}#postInput{max-width:calc(100% - 105px)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Keep the policy dialog compact while allowing its content to scroll. */
+#policyMenu .policy-content{
+  width:min(90%,520px);
+  max-width:520px;
+  max-height:min(520px,calc(100dvh - 40px));
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+@media(max-width:600px){
+  #policyMenu .policy-content{
+    width:100%;
+    max-height:min(480px,calc(100dvh - 32px));
+  }
+}
+/* Keep the original post design; only the feed scrolls independently. */
+#posts{
+  max-height:clamp(360px,65dvh,800px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-color:#49698d #101e32;
+  scrollbar-width:thin;
+}
 </style>
 </head>
 <body>
@@ -236,7 +259,7 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
 <input id="postInput" placeholder="write something!" aria-label="Write a post" maxlength="2000" autocomplete="off">
 <button id="postBtn">Post</button><span id="postHint" class="post-hint" aria-live="polite"></span>
 
-<div id="posts">
+<div id="posts" role="feed" aria-label="Posts" tabindex="0">
   <div class="post" style="animation-delay: 0s;">
     <div><b>loading...</b></div>
     <div class="meta"></div>
@@ -258,19 +281,41 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
 
 
 <hr>
-<button onclick="openPolicy()">Privacy Policy &amp; Terms of Use</button>
+<button type="button" onclick="window.location.href='https://adamisbored.xyz/policies/'">Privacy Policy &amp; Terms of Use</button>
 
 <div id="policyMenu" class="popup">
-  <div class="popup-content">
+  <div class="popup-content policy-content">
     <h2>Privacy Policy</h2>
-    <p>The information that is collected:
-usernames, s (stored in Google Firebase for login and moderation purposes), messages posted to this forum, (your password is NOT accesible to the owner of this forum.).to get your information deleted off of this forum, please contact adameschr@gmail.com with the email address associated with your account. Thank you for reading the privacy policy, have fun on this forum </p>
-    <p>LAST UPDATED: JULY 2nd 2026</p>
-	  <h2>Terms of Use</h2>
-    <p>Here's a list of the rules of this forum</p>
-    <p>any bypassing of the post filter (the thing that blocks you from posting certain words/sentences) will result in your message being deleted if found by the owner and after repeatedly bypassing the filter your account may be disabled.</p>
-    <p>inappropriate usernames will be deleted if found and you will have to pick a new username.</p>
-	<p>LAST UPDATED: JULY 2nd 2026</p>  
+    <p><strong>Last updated: October 22, 2026</strong></p>
+    <p>This policy explains how the Adam Is Bored Forum (forum.adamisbored.xyz) handles information when you use the forum.</p>
+    <h3>Information we process</h3>
+    <p>We use Firebase Authentication for account sign-in. Account information may include your email address and a unique account ID. We also store forum usernames, profile details (such as your bio and avatar), posts, replies, direct messages, and moderation information such as account bans.</p>
+    <p>Your password is handled by the authentication provider; the forum operator does not receive your plaintext password.</p>
+    <h3>How information is used</h3>
+    <p>We use this information to provide accounts, show public forum content, deliver direct messages, prevent abuse, apply rate limits, and enforce forum rules. Forum data is handled by our server-side API and stored using Google Firebase/Firestore. Hosting providers may process technical request information, such as IP addresses, timestamps, and browser details, in server logs for operation and security.</p>
+    <h3>Who can see what</h3>
+    <p>Your username, public profile, posts, and replies can be seen by forum visitors. Direct messages are intended for their participants, but may be accessed when reasonably necessary to operate the service, investigate abuse, or comply with legal obligations. Do not post sensitive personal information.</p>
+    <h3>Storage, retention, and your choices</h3>
+    <p>Information is kept as needed to run and secure the forum. Deleting a post does not necessarily remove copies already seen or saved by others. If you want to request access to, correction of, or deletion of your personal information, contact <a href="mailto:adameschr@gmail.com">adameschr@gmail.com</a>. Include enough information to identify your account, but never send your password. Some information may need to be retained for security or legal reasons.</p>
+    <h3>Changes</h3>
+    <p>We may update this policy as the forum changes. The updated date above will show when it was last revised.</p>
+    <h2>Terms of Use</h2>
+    <p><strong>Last updated: October 22, 2026</strong></p>
+    <p>By using the Adam Is Bored Forum, you agree to follow these rules:</p>
+    <ul>
+      <li>Treat others respectfully. Do not intimidate, mistreat, impersonate, or deliberately target other users.</li>
+      <li>Do not share content that breaks the law, promotes hostility toward others, is unsuitable for the forum, sends unwanted repeated messages, deceives users, or causes harm.</li>
+      <li>Respect everyone's privacy. Do not share another person's private information without permission.</li>
+      <li>Follow moderation decisions and technical limits. Do not try to get around content filters, account restrictions, request limits, or security measures.</li>
+      <li>Only access accounts, conversations, administrator features, and server systems that you are authorized to use.</li>
+      <li>Use suitable usernames and profile pictures. Do not share links or software intended to damage devices, accounts, or the service.</li>
+    </ul>
+    <h3>Moderation and availability</h3>
+    <p>Posts, replies, profiles, or accounts may be limited or removed if these rules are broken. Automated moderation may sometimes make mistakes; contact us if you think a decision was incorrect. Forum features may change, become temporarily unavailable, or be discontinued.</p>
+    <h3>Your content</h3>
+    <p>You are responsible for content you submit. You should only upload material you have permission to share. By posting public content, you allow the forum to display it to visitors as part of the service.</p>
+    <h3>Contact</h3>
+    <p>For privacy questions, account requests, or reports of rule violations, email <a href="mailto:adameschr@gmail.com">adameschr@gmail.com</a>.</p>
     <button onclick="closePolicy()">Close</button>
   </div>
 </div>
@@ -450,12 +495,36 @@ async function isSevereToxic(text){
   );
 }
 
+async function getMyForumAccount(){
+  if(!auth.currentUser) return null;
+  const token = await auth.currentUser.getIdToken();
+  const response = await fetch("https://api.adamisbored.xyz/v1/forum/me",{
+    headers:{"Authorization":"Bearer "+token},cache:"no-store"
+  });
+  if(!response.ok) throw new Error("Account API unavailable ("+response.status+")");
+  return response.json();
+}
+async function getPublicForumProfile(uid){
+  if(!uid || !/^[a-zA-Z0-9]{1,128}$/.test(uid)) return null;
+  const response = await fetch("https://api.adamisbored.xyz/v1/forum/profiles/"+encodeURIComponent(uid));
+  if(response.status === 404) return null;
+  if(!response.ok) throw new Error("Profile API unavailable ("+response.status+")");
+  const result = await response.json();
+  return result.profile || null;
+}
+async function lookupForumUsername(username){
+  const response = await fetch("https://api.adamisbored.xyz/v1/forum/username/"+encodeURIComponent(username));
+  if(!response.ok) throw new Error("Username lookup unavailable");
+  const result = await response.json();
+  return result.uid || null;
+}
 async function getUsername(uid){
- const d = await getDoc(doc(db,"users",uid));
- return d.exists() ? d.data().username : null;
+ const profile = await getPublicForumProfile(uid);
+ return profile?.username || null;
 }
 
 function safeAvatarUrl(value,fallback){
+ if(typeof value === 'string' && value.length <= 2_000_000 && /^data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/.test(value)) return value;
  try{const u=new URL(String(value),location.href);return (u.protocol==='https:'||u.protocol==='http:')?escapeHtml(u.href):fallback;}catch{return fallback;}
 }
 
@@ -469,29 +538,30 @@ function escapeHtml(value){
 }
 
 async function usernameTaken(username){
- const snap = await getDocs(collection(db,"users"));
- let taken = false;
- snap.forEach(d=>{
-   const u = d.data().username;
-   if(u && u.toLowerCase()===username.toLowerCase()) taken=true;
- });
- return taken;
+ return Boolean(await lookupForumUsername(username));
+}
+
+async function updateForumProfile(changes){
+  if(!auth.currentUser) throw new Error("Sign in required");
+  const token = await auth.currentUser.getIdToken();
+  const response = await fetch("https://api.adamisbored.xyz/v1/forum/me/profile",{
+    method:"POST",
+    headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+    body:JSON.stringify(changes)
+  });
+  if(!response.ok){
+    const detail = await response.json().catch(()=>({}));
+    throw new Error(detail.error || "Profile update failed ("+response.status+")");
+  }
+  return response.json();
 }
 
 async function ensureUsername(user){
  if(!user) return null; // must be logged in
 
- const userRef = doc(db,"users",user.uid);
- let existingDoc = await getDoc(userRef);
- if(existingDoc.exists()){
-   const data = existingDoc.data();
-   if(data.username){
-     if(!data.createdAt){
-       await setDoc(userRef, { createdAt: serverTimestamp() }, { merge: true });
-     }
-     return data.username;
-   }
- }
+ const account = await getMyForumAccount();
+ if(account?.banned) throw new Error("Account is banned");
+ if(account?.username) return account.username;
 
  let username = prompt("Choose a unique username");
 
@@ -509,31 +579,31 @@ async function ensureUsername(user){
    return ensureUsername(user);
  }
 
- const update = {
-   username,
-   email:user.email,
-   uid:user.uid,
-   backupname:username
- };
-
- if(!existingDoc.exists() || !existingDoc.data().createdAt){
-   update.createdAt = serverTimestamp();
- }
-
- await setDoc(userRef, update, { merge: true });
+ await updateForumProfile({username});
  return username;
+}
+
+function showPostStatus(title, message) {
+ const container = document.getElementById("posts");
+ container.innerHTML = `
+   <div class="post" style="animation-delay:0s;">
+     <div><b>${escapeHtml(title)}</b></div>
+     <div class="meta"></div>
+     <div style="margin:8px 0">${escapeHtml(message)}</div>
+   </div>`;
+ updateLanguage();
 }
 
 async function loadPosts(){
  const container = document.getElementById("posts");
  const viewerUid=auth.currentUser?.uid;
- container.textContent="Loading posts…";
+ showPostStatus("loading...", "loading posts, please wait...");
  // If the current viewer is banned, stop and show banned message
  if(auth.currentUser){
    try{
-     const meDoc = await getDoc(doc(db,'users', auth.currentUser.uid));
-     if(meDoc.exists() && meDoc.data().banned && (await getUsername(auth.currentUser.uid)) !== 'skbidi676767676767676676767'){
-       const banReason = meDoc.data().banReason || 'banned by moderator';
+     const meDoc = await getMyForumAccount();
+    if(meDoc?.banned){
+       const banReason = meDoc.banReason || 'banned by moderator';
        container.innerHTML = `
          <div class="post" style="animation-delay:0s;">
            <div><b>banned.</b></div>
@@ -545,13 +615,46 @@ async function loadPosts(){
      }
    }catch(e){console.error(e)}
  }
- // viewer username (allow admin to still see banned users' posts)
+ // UI capabilities come from the server, never from editable usernames.
+ window.__forumIsAdmin = false;
+ if (auth.currentUser) {
+   try {
+     const token = await auth.currentUser.getIdToken();
+     const response = await fetch("https://api.adamisbored.xyz/v1/forum/me", {
+       headers: { "Authorization": "Bearer " + token },
+       signal: AbortSignal.timeout(5000)
+     });
+     if (response.ok) window.__forumIsAdmin = (await response.json()).isAdmin === true;
+   } catch (error) { console.warn("Admin capability unavailable"); }
+ }
  const viewerUsername = auth.currentUser ? await getUsername(auth.currentUser.uid) : null;
 
- const snap = await getDocs(collection(db,"posts"));
-
- // load all replies once and group by postId
- const repliesSnap = await getDocs(collection(db,'replies'));
+ // Use the VPS API as the authoritative source of posts and replies.
+  // Never silently fall back to direct Firestore reads.
+  let snap, repliesSnap;
+  try {
+    const response = await fetch("https://api.adamisbored.xyz/v1/forum/feed", {signal:AbortSignal.timeout(10000)});
+    if(!response.ok) throw new Error("API feed failed (" + response.status + ")");
+    const feed = await response.json();
+    if(!Array.isArray(feed.posts) || !Array.isArray(feed.replies)) throw new Error("Invalid API feed");
+    const snapshot = items => ({
+      docs: items.map(item => ({id:item.id,data:()=>item})),
+      forEach(callback){this.docs.forEach(callback);}
+    });
+    snap = snapshot(feed.posts);
+    repliesSnap = snapshot(feed.replies);
+  } catch(error) {
+    console.error("Forum feed unavailable",error);
+    container.innerHTML = '<div class="post"><b>Posts are temporarily unavailable.</b><div>Please try again in a moment.</div></div>';
+    return;
+  }
+  // Legacy documents without a moderationStatus remain visible; never show rejected/pending items.
+ const visibleForumDoc = d => !d.moderationStatus || d.moderationStatus === "approved";
+ snap = { ...snap, docs: snap.docs.filter(d => visibleForumDoc(d.data())) };
+ repliesSnap = { ...repliesSnap,
+   docs: repliesSnap.docs.filter(d => visibleForumDoc(d.data())),
+   forEach(callback) { this.docs.forEach(callback); }
+ };
  const repliesByPost = {};
  repliesSnap.forEach(r => {
    const rd = r.data();
@@ -561,20 +664,30 @@ async function loadPosts(){
  });
 
  const currentUsername = auth.currentUser ? await getUsername(auth.currentUser.uid) : null;
+ const authorProfiles = new Map();
+ async function getAuthorProfile(uid){
+   if(!uid || !/^[A-Za-z0-9]{1,128}$/.test(uid)) return null;
+   if(!authorProfiles.has(uid)){
+     authorProfiles.set(uid, getPublicForumProfile(uid).catch(error => {
+       console.warn('Author profile unavailable', error);
+       return null;
+     }));
+   }
+   return authorProfiles.get(uid);
+ }
  const postPromises = snap.docs.map(async (postDoc) => {
    const data = postDoc.data();
    const div = document.createElement("div");
    div.className = "post";
    div.style.animationDelay = `${Math.min(snap.docs.indexOf(postDoc) * 0.05, 1)}s`;
 
-   let avatarUrl = 'https://www.gravatar.com/avatar/?d=mp&s=80';
+   let avatarUrl = data.avatar || 'https://www.gravatar.com/avatar/?d=mp&s=80';
    let displayName = data.user || 'unknown user';
    let badgesHtml = '';
    try{
-     const prof = await getDoc(doc(db,'users', data.uid || ''));
-     if(prof.exists()){
-       const pd = prof.data();
-       if(pd.banned && viewerUsername !== 'adam'){
+     const pd = await getAuthorProfile(data.uid || '');
+     if(pd){
+       if(pd.banned){
          return;
        }
        avatarUrl = pd.avatar || avatarUrl;
@@ -585,15 +698,18 @@ async function loadPosts(){
    }catch(e){console.error('profile load failed', e);} 
 
    const postReplies = repliesByPost[postDoc.id] || [];
+   const replyProfiles = await Promise.all(postReplies.map(r => getAuthorProfile(r.uid || '')));
    const moderationLabel = data.toxic === true
      ? '<div class="meta post-moderation">⚠︎ This message may violate the Terms of Use.</div>'
      : '';
    let repliesHtml = '<div class="replies">';
-   for(const r of postReplies){
+   for(const [replyIndex, r] of postReplies.entries()){
+     const replyProfile = replyProfiles[replyIndex];
+     const replyAvatar = replyProfile?.avatar || r.avatar;
      repliesHtml += `
        <div class="reply">
          <div style="display:flex;align-items:center">
-           <img src="${safeAvatarUrl(r.avatar, 'https://www.gravatar.com/avatar/?d=mp&s=48')}" class="avatar" alt="avatar">
+           <img src="${safeAvatarUrl(replyAvatar, 'https://www.gravatar.com/avatar/?d=mp&s=48')}" class="avatar" alt="avatar">
            <div style="margin-left:8px"><b>${escapeHtml(r.user || 'unknown')}</b> <span class="meta">${r.createdAt? timeAgo(r.createdAt): ''}</span></div>
          </div>
          <div style="margin-top:6px">${escapeHtml(r.text || '')}</div>
@@ -609,7 +725,7 @@ async function loadPosts(){
    div.innerHTML = `
   <div style="display:flex;align-items:center">
     <img src="${safeAvatarUrl(avatarUrl, 'https://www.gravatar.com/avatar/?d=mp&s=80')}" class="avatar" alt="avatar">
-    <div style="margin-left:8px"><b><a href="#" onclick="openProfile('${data.uid || ''}');return false;">${escapeHtml(displayName)}</a></b>${badgesHtml}</div>
+    <div style="margin-left:8px"><b><a href="#" onclick="openProfile('${/^[A-Za-z0-9]{1,128}$/.test(data.uid || '') ? data.uid : ''}');return false;">${escapeHtml(displayName)}</a></b>${badgesHtml}</div>
   </div>
   <div class="meta">${timeAgo(data.createdAt || "timestamp not available")}</div>
   <div style="margin:8px 0">${escapeHtml(data.text || "text not available")}</div>
@@ -618,12 +734,20 @@ async function loadPosts(){
   ${repliesHtml}
    `;
 
-   if (currentUsername === "adam") {
+   if (auth.currentUser && (auth.currentUser.uid === data.uid || window.__forumIsAdmin === true)) {
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "Delete";
 
       deleteBtn.onclick = async () => {
-         await deleteDoc(doc(db, "posts", postDoc.id));
+
+         const token = await auth.currentUser.getIdToken();
+         const response = await fetch("https://api.adamisbored.xyz/v1/forum/posts/" +
+           encodeURIComponent(postDoc.id), {method:"DELETE",headers:{"Authorization":"Bearer "+token}});
+         if(!response.ok) {
+           const detail = await response.json().catch(()=>({}));
+           alert(detail.error || "Delete failed ("+response.status+")");
+           return;
+         }
          loadPosts();
       };
 
@@ -637,7 +761,7 @@ async function loadPosts(){
  const renderedPosts=await Promise.all(postPromises);
  if(auth.currentUser?.uid!==viewerUid)return;
  container.replaceChildren(...renderedPosts.filter(Boolean));
- if(!renderedPosts.some(Boolean))container.textContent='No posts yet.';
+ if(!renderedPosts.some(Boolean))showPostStatus('no posts yet', 'Be the first to post!');
  
  // Always retranslate after posts load to ensure consistency
  setTimeout(() => {
@@ -650,8 +774,8 @@ resetNameButton.onclick = async () => {
   const username = await getUsername(auth.currentUser.uid);
    // ensure we also respect explicit banned flag in user doc
    try{
-     const ud = await getDoc(doc(db,'users', auth.currentUser.uid));
-     if(ud.exists() && ud.data().banned){
+     const ud = await getMyForumAccount();
+    if(ud?.banned){
        document.getElementById("posts").innerHTML = `
           <div class="post" style="animation-delay:0s;">
               <div><b>something went wrong.</b></div>
@@ -681,13 +805,7 @@ resetNameButton.onclick = async () => {
 			return;
 			}
   
-  await setDoc(
-    doc(db, "users", user.uid),
-    {
-      username: ""
-    },
-    { merge: true }
-  );
+  await updateForumProfile({resetUsername:true});
   console.log("username reset.")
     document.getElementById("posts").innerHTML = `
         <div class="post" style="animation-delay:0s;">
@@ -755,7 +873,7 @@ async function loadDeveloperMessage(){
       div.style.animationDelay = `${index * 0.1}s`;
       div.innerHTML = `
         <div><b>message from the developer</b></div>
-        <div style="margin:8px 0">${message}</div>`;
+        <div style="margin:8px 0">${escapeHtml(message)}</div>`;
       container.appendChild(div);
     });
   }catch(e){
@@ -770,12 +888,24 @@ async function loadDeveloperMessage(){
 
 function formatJoinDate(value){
  if(!value) return 'unavailable';
+ if(typeof value === 'number'){
+   const date = new Date(value < 1e11 ? value * 1000 : value);
+   return Number.isNaN(date.getTime()) ? 'unavailable' : date.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+ }
  if(typeof value === 'string'){
    const parsed = new Date(value);
    return isNaN(parsed.getTime()) ? 'unavailable' : parsed.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
  }
- if(value.toDate){
-   return value.toDate().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+ if(typeof value === 'object'){
+   const seconds = value.seconds ?? value._seconds;
+   if(typeof seconds === 'number' && Number.isFinite(seconds)){
+     const date = new Date(seconds * 1000);
+     return Number.isNaN(date.getTime()) ? 'unavailable' : date.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+   }
+ }
+ if(typeof value.toDate === 'function'){
+   const date = value.toDate();
+   return Number.isNaN(date.getTime()) ? 'unavailable' : date.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
  }
  if(value instanceof Date){
    return value.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
@@ -1064,12 +1194,12 @@ console.log("wsg login text")
 
         loadPosts().catch(error=>{
           console.error('Failed to load forum posts',error);
-          document.getElementById('posts').textContent='Could not load posts. Please refresh or try again later.';
+          showPostStatus('could not load posts', 'Please refresh or try again later.');
         });
     } else {
         statusElement.textContent =
             "Not logged in.";
-        document.getElementById('posts').textContent='Sign in to view forum posts.';
+        showPostStatus('not logged in', 'Sign in to view forum posts.');
         document.getElementById("adminPanel").style.display = "none";
     }
 });
@@ -1078,9 +1208,9 @@ console.log("wsg login text")
 onAuthStateChanged(auth, async (user2) => {
   if(!user2) return;
   try{
-    const ud = await getDoc(doc(db,'users', user2.uid));
-    if(ud.exists() && ud.data().banned){
-      const banReason = ud.data().banReason || 'you have been banned by a moderator.';
+    const ud = await getMyForumAccount();
+    if(ud?.banned){
+      const banReason = ud.banReason || 'you have been banned by a moderator.';
       document.getElementById('posts').innerHTML = `
         <div class="post" style="animation-delay:0s;">
           <div><b>banned.</b></div>
@@ -1097,6 +1227,7 @@ onAuthStateChanged(auth, async (user2) => {
 // a startup timer must never overwrite content after a successful sign-in.
 
 postBtn.onclick = async ()=>{
+
  if(!auth.currentUser){
         document.getElementById("posts").innerHTML = `
   <div class="post">
@@ -1197,13 +1328,7 @@ console.log("wsg adam as login text for meeeee")
 const user = auth.currentUser;
 
 if (text.includes("adamisgay")) {
-  await setDoc(
-    doc(db, "users", user.uid),
-    {
-      username: "postban"
-    },
-    { merge: true }
-  );
+  // Legacy username mutation removed; server owns profile changes.
 
   return;
 }
@@ -1216,13 +1341,7 @@ if (text.includes("should i touch grass adam")) {
 }
 
 if (text.trim().toLowerCase() === "i want to reset my username") {
-  await setDoc(
-    doc(db, "users", user.uid),
-    {
-      username: ""
-    },
-    { merge: true }
-  );
+  await updateForumProfile({resetUsername:true});
   console.log("username reset.")
     document.getElementById("posts").innerHTML = `
         <div class="post" style="animation-delay:0s;">
@@ -1258,13 +1377,7 @@ const bannedUsernames = [
 ];
 
 if (bannedUsernames.some(word => username.toLowerCase().includes(word))) {
-  await setDoc(
-    doc(db, "users", user.uid),
-    {
-      username: ""
-    },
-    { merge: true }
-  );
+  await updateForumProfile({resetUsername:true});
 
   console.log("username reset due to banned username");
   document.getElementById("posts").innerHTML = `
@@ -1312,7 +1425,7 @@ for (const phrase of bannedPhrases) {
         document.getElementById("posts").innerHTML = `
   <div class="post" style="animation-delay:0s;">
     <div><b>message not posted</b></div>
-    <div style="margin:8px 0">"${text}" is not allowed to be posted on this forum.</div>
+    <div style="margin:8px 0">"${escapeHtml(text)}" is not allowed to be posted on this forum.</div>
   </div>
 `;
 scheduleLanguageUpdate();
@@ -1329,40 +1442,32 @@ setTimeout(() => {
 
    if(await isSevereToxic(text)){
      const banReason = banReasons.severe_toxic;
-     await setDoc(doc(db, "users", user.uid), {
-       banned: true,
-       banCode: banReason.code
-     }, { merge: true });
 
      document.getElementById("posts").innerHTML = `
        <div class="post">
          <b>you have been banned.</b>
-         <div style="margin:8px 0">${banReason.message}</div>
+         <div style="margin:8px 0">${escapeHtml(banReason.message)}</div>
        </div>
      `;
      document.getElementById("postBtn").disabled = true;
      return;
    }
 
-   const toxic = await isToxic(text);
-
-   const profile = await getDoc(doc(db, "users", user.uid));
-   const profileData = profile.exists() ? profile.data() : {};
-   await addDoc(collection(db, "posts"), {
-     text,
-     user: profileData.username || auth.currentUser.email || "Unknown user",
-     email: auth.currentUser.email || null,
-     uid: user.uid,
-     createdAt: Date.now(),
-     moderationStatus: "approved",
-    toxic,
-     ...(profileData.avatar ? { avatar: profileData.avatar } : {})
+   const token = await user.getIdToken();
+   const response = await fetch("https://api.adamisbored.xyz/v1/forum/posts", {
+     method:"POST",
+     headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+     body:JSON.stringify({text})
    });
+   if(!response.ok) {
+     const detail = await response.json().catch(()=>({}));
+     throw new Error(detail.error || "Posting failed ("+response.status+")");
+   }
  } catch (error) {
    document.getElementById("posts").innerHTML = `
      <div class="post">
        <b>message not posted</b>
-       <div style="margin:8px 0">${error.message || "mod unavailable"}</div>
+       <div style="margin:8px 0">${escapeHtml(error.message || "mod unavailable")}</div>
      </div>
    `;
    return;
@@ -1376,17 +1481,17 @@ console.log("posting")
   // include avatar from profile in preview
   let previewAvatar = 'https://www.gravatar.com/avatar/?d=mp&s=80';
   try{
-    const prof = await getDoc(doc(db,'users', auth.currentUser.uid));
-    if(prof.exists()) previewAvatar = prof.data().avatar || previewAvatar;
+    const prof = await getPublicForumProfile(auth.currentUser.uid);
+    if(prof) previewAvatar = safeAvatarUrl(prof.avatar, previewAvatar);
   }catch(e){console.error(e)}
 
 document.getElementById("posts").innerHTML = `
   <div class="post" style="animation-delay:0s;">
     <div style="display:flex;align-items:center">
-      <img src="${previewAvatar}" class="avatar" alt="avatar">
-      <div style="margin-left:8px"><b>${username}</b></div>
+      <img src="${safeAvatarUrl(previewAvatar, "https://www.gravatar.com/avatar/?d=mp&s=80")}" class="avatar" alt="avatar">
+      <div style="margin-left:8px"><b>${escapeHtml(username)}</b></div>
     </div>
-    <div style="margin:8px 0">${text}</div>
+    <div style="margin:8px 0">${escapeHtml(text)}</div>
     <div class="meta">[message preview] posting in progress...</div>
   </div>
 `;
@@ -1408,22 +1513,40 @@ document.getElementById("searchBtn").onclick = async () => {
  results.innerHTML="";
  if(!username) return;
 
- const snap=await getDocs(collection(db,"posts"));
+ let feed;
+ try {
+   const response = await fetch("https://api.adamisbored.xyz/v1/forum/feed", {signal:AbortSignal.timeout(10000)});
+   if(!response.ok) throw new Error("Could not load posts (" + response.status + ")");
+   feed = await response.json();
+   if(!Array.isArray(feed.posts)) throw new Error("Invalid feed");
+ } catch(error) {
+   results.textContent = error.message || "Could not load posts.";
+   return;
+ }
+ const posts = feed.posts.map(item => ({id:item.id,data:()=>item}));
 
- snap.forEach(post=>{
+ posts.forEach(post=>{
    const data=post.data();
    if(data.user!==username) return;
 
    const div=document.createElement("div");
    div.className="post";
-   div.innerHTML=`<b>${data.user}</b><br>${data.uid}<br>${data.text}`;
+   div.innerHTML=`<b>${escapeHtml(data.user)}</b><br>${escapeHtml(data.uid)}<br>${escapeHtml(data.text)}`;
 
    const btn=document.createElement("button");
    btn.textContent="Delete";
    btn.onclick=async()=>{
-      await deleteDoc(doc(db,"posts",post.id));
-      div.remove();
-	  loadPosts(); 
+      try {
+        const token = await auth.currentUser.getIdToken();
+        const response = await fetch("https://api.adamisbored.xyz/v1/forum/posts/" +
+          encodeURIComponent(post.id), {method:"DELETE",headers:{"Authorization":"Bearer "+token}});
+        if(!response.ok) {
+          const detail = await response.json().catch(()=>({}));
+          throw new Error(detail.error || "Delete failed ("+response.status+")");
+        }
+        div.remove();
+        loadPosts();
+      } catch(error) { alert(error.message || "Delete failed"); } 
    };
 
    div.appendChild(document.createElement("br"));
@@ -1440,31 +1563,45 @@ document.getElementById('listUsersBtn').onclick = async function(){
   const container = document.getElementById('userList');
   container.innerHTML = 'Loading users...';
   try{
-    const snap = await getDocs(collection(db,'users'));
+    if(!auth.currentUser) throw new Error("Sign in required");
+    const token = await auth.currentUser.getIdToken();
+    const response = await fetch("https://api.adamisbored.xyz/v1/forum/admin/users",{
+      headers:{"Authorization":"Bearer "+token}
+    });
+    if(!response.ok) throw new Error("Admin user list unavailable ("+response.status+")");
+    const result = await response.json();
+    if(!Array.isArray(result.users)) throw new Error("Invalid admin user list");
     container.innerHTML='';
-    snap.forEach(u=>{
-      const d = u.data();
+    result.users.forEach(u=>{
+      const d = u;
       const div = document.createElement('div');
       div.className='post';
-      div.innerHTML = `<b>${d.username || '(no username)'}</b> <span class="meta">${d.email||''}</span> <div style="margin-top:6px">${d.badges? d.badges.map(b=>`<span class='badge'>${b}</span>`).join(' ') : ''}</div>${d.banned && d.banReason ? `<div class="meta" style="margin-top:6px">Ban reason: ${d.banReason}</div>` : ''}`;
+      div.innerHTML = `<b>${escapeHtml(d.username || '(no username)')}</b> <span class="meta">${escapeHtml(d.email||'')}</span> <div style="margin-top:6px">${d.badges? d.badges.map(b=>`<span class='badge'>${escapeHtml(b)}</span>`).join(' ') : ''}</div>${d.banned && d.banReason ? `<div class="meta" style="margin-top:6px">Ban reason: ${escapeHtml(d.banReason)}</div>` : ''}`;
       const banBtn = document.createElement('button');
       banBtn.textContent = d.banned ? 'Unban' : 'Ban';
       banBtn.onclick = async ()=>{
-        if(d.banned){
-          // unban
-          await setDoc(doc(db,'users',u.id),{banned:false,banCode:null,banReason:null},{merge:true});
-        } else {
-          // ban
-          const reason = prompt(`Enter a ban reason for ${d.username || 'this user'}:`);
-          if(reason === null) return;
-          await setDoc(doc(db,'users',u.id),{
-            banned:true,
-            banCode:'manual',
-            banReason: reason.trim() || 'unknown'
-          },{merge:true});
-        }
-        // refresh list
-        document.getElementById('listUsersBtn').click();
+        try {
+          if(!auth.currentUser) throw new Error('Sign in required');
+          const token = await auth.currentUser.getIdToken();
+          let reason = '';
+          if(!d.banned){
+            const entered = prompt(`Enter a ban reason for ${d.username || 'this user'}:`);
+            if(entered === null) return;
+            reason = entered.trim() || 'unknown';
+          }
+          const action = d.banned ? 'unban' : 'ban';
+          const response = await fetch('https://api.adamisbored.xyz/v1/forum/admin/users/' +
+            encodeURIComponent(u.id) + '/' + action, {
+            method:'POST',
+            headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+            body:JSON.stringify(action === 'ban' ? {reason} : {})
+          });
+          if(!response.ok){
+            const detail = await response.json().catch(()=>({}));
+            throw new Error(detail.error || 'Admin request failed ('+response.status+')');
+          }
+          document.getElementById('listUsersBtn').click();
+        }catch(error){ alert(error.message || 'Admin request failed'); }
       };
       div.appendChild(document.createElement('br'));
       div.appendChild(banBtn);
@@ -1473,13 +1610,19 @@ document.getElementById('listUsersBtn').onclick = async function(){
   }catch(e){console.error(e);container.textContent='Could not load users.'}
 };
 
-async function banUserById(uid){
-  await setDoc(doc(db,'users',uid),{banned:true,banCode:'manual'},{merge:true});
+async function adminBanRequest(uid, action, reason=''){
+  if(!auth.currentUser) throw new Error('Sign in required');
+  const token = await auth.currentUser.getIdToken();
+  const response = await fetch('https://api.adamisbored.xyz/v1/forum/admin/users/' +
+    encodeURIComponent(uid) + '/' + action, {
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify(action === 'ban' ? {reason:reason || 'manual'} : {})
+  });
+  if(!response.ok) throw new Error((await response.json().catch(()=>({}))).error || 'Admin request failed');
 }
-
-async function unbanUserById(uid){
-  await setDoc(doc(db,'users',uid),{banned:false,banCode:null},{merge:true});
-}
+async function banUserById(uid){ return adminBanRequest(uid,'ban','manual'); }
+async function unbanUserById(uid){ return adminBanRequest(uid,'unban'); }
 
 window.openAccountMenu = function(){
   const menu = document.getElementById('accountMenu');
@@ -1511,14 +1654,26 @@ function getConversationId(uidA, uidB){
 async function getDisplayName(uid){
   if(!uid) return 'Unknown user';
   try{
-    const userDoc = await getDoc(doc(db, 'users', uid));
-    if(userDoc.exists() && userDoc.data().username){
-      return userDoc.data().username;
-    }
+    const profile = await getPublicForumProfile(uid);
+    if(profile?.username) return profile.username;
   }catch(e){
     console.error('Could not load user display name', e);
   }
   return 'Unknown user';
+}
+
+
+async function loadDmFromApi(partnerUid = null) {
+  if (!auth.currentUser) throw Error("Log in to view messages");
+  const token = await auth.currentUser.getIdToken();
+  const path = partnerUid ? "?partner=" + encodeURIComponent(partnerUid) : "";
+  const response = await fetch("https://api.adamisbored.xyz/v1/forum/dms" + path, {
+    headers: { Authorization: "Bearer " + token }, cache: "no-store"
+  });
+  if (!response.ok) throw Error("DM API returned " + response.status);
+  const data = await response.json();
+  if (!Array.isArray(data.messages)) throw Error("Invalid DM response");
+  return data.messages;
 }
 
 async function loadDirectMessages(){
@@ -1531,11 +1686,10 @@ async function loadDirectMessages(){
   }
 
   try{
-    const snap = await getDocs(dmMessagesCollection);
+    const dmMessages = await loadDmFromApi();
     const threads = new Map();
 
-    snap.forEach((messageDoc) => {
-      const data = messageDoc.data();
+    dmMessages.forEach((data) => {
       const isRelated = data.senderUid === auth.currentUser.uid || data.recipientUid === auth.currentUser.uid;
       if(!isRelated) return;
 
@@ -1564,7 +1718,13 @@ async function loadDirectMessages(){
       const item = document.createElement('button');
       item.type = 'button';
       item.className = 'dm-thread-item' + (activeDmUserId === partnerUid ? ' active' : '');
-      item.innerHTML = `<div class="dm-thread-name">${partnerName}</div><div class="meta">${thread.lastText}</div>`;
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'dm-thread-name';
+      nameDiv.textContent = partnerName;
+      const previewDiv = document.createElement('div');
+      previewDiv.className = 'meta';
+      previewDiv.textContent = thread.lastText;
+      item.append(nameDiv, previewDiv);
       item.onclick = () => openDirectMessageThread(partnerUid);
       listEl.appendChild(item);
     }
@@ -1586,18 +1746,17 @@ async function openDirectMessageThread(partnerUid){
   threadHeader.textContent = `Chat with ${partnerName}`;
   composerEl.style.display = 'flex';
 
-  const snap = await getDocs(dmMessagesCollection);
+  const dmMessages = await loadDmFromApi(partnerUid);
   const messages = [];
   const convoId = getConversationId(auth.currentUser.uid, partnerUid);
 
-  snap.forEach((messageDoc) => {
-    const data = messageDoc.data();
+  dmMessages.forEach((data) => {
     const matches = data.conversationId === convoId
       || (data.senderUid === auth.currentUser.uid && data.recipientUid === partnerUid)
       || (data.senderUid === partnerUid && data.recipientUid === auth.currentUser.uid);
 
     if(!matches) return;
-    messages.push({ ...data, id: messageDoc.id });
+    messages.push(data);
   });
 
   messages.sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
@@ -1635,15 +1794,7 @@ async function openDirectMessageThread(partnerUid){
 }
 
 async function findUserByUsername(username){
-  const snap = await getDocs(collection(db, 'users'));
-  let foundUid = null;
-  snap.forEach((userDoc) => {
-    const data = userDoc.data();
-    if(data.username && data.username.toLowerCase() === username.toLowerCase()){
-      foundUid = userDoc.id;
-    }
-  });
-  return foundUid;
+ return lookupForumUsername(username);
 }
 
 window.openMessages = async function(){
@@ -1662,8 +1813,8 @@ window.openMessages = async function(){
 
   // Check if user is banned
   try{
-    const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
-    if(userDoc.exists() && userDoc.data().banned){
+    const userDoc = await getMyForumAccount();
+    if(userDoc?.banned){
       document.getElementById("posts").innerHTML = `
         <div class="post" style="animation-delay:0s;">
             <div><b>something went wrong.</b></div>
@@ -1702,8 +1853,8 @@ document.getElementById('dmSearchBtn').onclick = async function(){
 
   // Check if user is banned
   try{
-    const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
-    if(userDoc.exists() && userDoc.data().banned){
+    const userDoc = await getMyForumAccount();
+    if(userDoc?.banned){
       alert('you have been banned and cannot message users');
       return;
     }
@@ -1734,8 +1885,8 @@ document.getElementById('sendDmBtn').onclick = async function(){
 
   // Check if user is banned
   try{
-    const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
-    if(userDoc.exists() && userDoc.data().banned){
+    const userDoc = await getMyForumAccount();
+    if(userDoc?.banned){
       alert('you have been banned and cannot send messages');
       return;
     }
@@ -1743,34 +1894,36 @@ document.getElementById('sendDmBtn').onclick = async function(){
     console.error('Could not check ban status', e);
   }
 
-  const toxic = await isToxic(text);
-
-  await addDoc(dmMessagesCollection, {
-    conversationId: getConversationId(auth.currentUser.uid, activeDmUserId),
-    senderUid: auth.currentUser.uid,
-    recipientUid: activeDmUserId,
-    text,
-    toxic,
-    createdAt: Date.now()
-  });
-
-  input.value = '';
-  await openDirectMessageThread(activeDmUserId);
+  try {
+    const token = await auth.currentUser.getIdToken();
+    const response = await fetch("https://api.adamisbored.xyz/v1/forum/dms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ recipientUid: activeDmUserId, text })
+    });
+    if (!response.ok) {
+      const detail = await response.json().catch(() => ({}));
+      throw Error(detail.error || "DM API returned " + response.status);
+    }
+    input.value = '';
+    await openDirectMessageThread(activeDmUserId);
+  } catch (error) {
+    alert("Message not sent: " + error.message);
+  }
 };
 
 window.openProfile = async function(uid){
   const popup = document.getElementById('profilePopup');
   if(!uid){ alert('Profile not available'); return; }
   try{
-    const d = await getDoc(doc(db,'users',uid));
-    if(!d.exists()){ alert('Profile not found'); return; }
-    const data = d.data();
+    const data = await getPublicForumProfile(uid);
+    if(!data){ alert('Profile not found'); return; }
     document.getElementById('profileUsername').textContent = data.username || 'unknown user';
     document.getElementById('profileTitle').textContent = data.username ? data.username + "'s profile" : 'profile';
     document.getElementById('profileEmail').textContent = data.rank || 'forum user';
     document.getElementById('profileJoinDate').textContent = `Joined ${formatJoinDate(data.createdAt || data.joinDate || data.joinedAt)}`;
     const badges = data.badges || [];
-    document.getElementById('profileBadges').innerHTML = badges.map(b=>`<span class="badge">${b}</span>`).join('');
+    document.getElementById('profileBadges').innerHTML = badges.map(b=>`<span class="badge">${escapeHtml(b)}</span>`).join('');
     document.getElementById('profileBio').textContent = data.bio || 'No bio';
     document.getElementById('profileAvatar').src = data.avatar || 'https://www.gravatar.com/avatar/?d=mp&s=80';
     document.getElementById('editProfileForm').style.display = 'none';
@@ -1832,7 +1985,7 @@ document.getElementById('saveProfileBtn').onclick = async function(){
   }
   const update = { bio };
   if(avatarData) update.avatar = avatarData;
-  await setDoc(doc(db,'users',uid), update, { merge: true});
+  await updateForumProfile(update);
   document.getElementById('profileBio').textContent = bio || 'No bio';
   if(avatarData) document.getElementById('profileAvatar').src = avatarData;
   document.getElementById('editProfileForm').style.display='none';
@@ -1847,15 +2000,16 @@ window.openReplyBox = function(postId){
 };
 
 window.submitReply = async function(postId){
+
   if(!auth.currentUser){ alert('please log in to reply'); return; }
   const input = document.getElementById(`replyInput-${postId}`);
   if(!input) return;
   const text = input.value.trim();
   if(!text) return;
   const uid = auth.currentUser.uid;
-  const userDoc = await getDoc(doc(db,'users',uid));
-  const username = userDoc.exists() ? userDoc.data().username : auth.currentUser.email;
-  const avatar = userDoc.exists() ? userDoc.data().avatar : null;
+  const profile = await getPublicForumProfile(uid);
+  const username = profile?.username || auth.currentUser.email;
+  const avatar = profile?.avatar || null;
   const replyDoc = {
     postId,
     text,
@@ -1865,16 +2019,21 @@ window.submitReply = async function(postId){
   };
   if (avatar !== undefined && avatar !== null) replyDoc.avatar = avatar;
   try {
-    if(await isToxic(text)){
-      throw new Error('reply was blocked by moderation.');
+    const token = await auth.currentUser.getIdToken();
+    const response = await fetch("https://api.adamisbored.xyz/v1/forum/replies", {
+      method:"POST",
+      headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+      body:JSON.stringify({postId,text})
+    });
+    if(!response.ok) {
+      const detail = await response.json().catch(()=>({}));
+      throw new Error(detail.error || "Reply failed ("+response.status+")");
     }
-
-    await addDoc(collection(db, 'replies'), replyDoc);
   } catch (error) {
     document.getElementById("posts").innerHTML = `
       <div class="post">
         <b>reply not saved</b>
-        <div style="margin:8px 0">${error.message || "mod unavailable"}</div>
+        <div style="margin:8px 0">${escapeHtml(error.message || "mod unavailable")}</div>
       </div>
     `;
 
