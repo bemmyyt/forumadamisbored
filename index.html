@@ -645,7 +645,7 @@ async function loadPosts(){
     repliesSnap = snapshot(feed.replies);
   } catch(error) {
     console.error("Forum feed unavailable",error);
-    container.innerHTML = '<div class="post"><b>Posts are temporarily unavailable.</b><div>Please try again in a moment.</div></div>';
+    showPostStatus("could not load posts", "The server is temporarily unavailable. Try again in a moment.");
     return;
   }
   // Legacy documents without a moderationStatus remain visible; never show rejected/pending items.
@@ -996,11 +996,11 @@ onAuthStateChanged(auth, async (user) => {
         statusElement.textContent = 'Logged in as ' + (user.email || 'your account');
         let username;
         try { username = await ensureUsername(user); }
-        catch(error) { console.error('Forum profile loading failed',error); statusElement.textContent='Logged in as '+(user.email||'your account')+' (profile unavailable)'; return; }
+        catch(error) { console.error('Forum profile loading failed',error); statusElement.textContent='Logged in as '+(user.email||'your account')+' (profile unavailable)'; showPostStatus('could not load your account', 'The server may be unavailable. Try again in a moment.'); return; }
         if(auth.currentUser?.uid!==user.uid)return;
         if(!username){
           statusElement.textContent='Logged in as '+(user.email||'your account')+' — choose a username to post';
-          document.getElementById('posts').textContent='Choose a forum username to continue. Refresh to retry username setup.';
+          showPostStatus('username required', 'Choose a forum username to continue. Refresh to retry username setup.');
           return;
         }
 		
@@ -1194,7 +1194,7 @@ console.log("wsg login text")
 
         loadPosts().catch(error=>{
           console.error('Failed to load forum posts',error);
-          showPostStatus('could not load posts', 'Please refresh or try again later.');
+          showPostStatus('could not load posts', 'The server may be unavailable. Please try again later.');
         });
     } else {
         statusElement.textContent =
@@ -1730,7 +1730,7 @@ async function loadDirectMessages(){
     }
   }catch(e){
     console.error('Could not load direct messages', e);
-    listEl.innerHTML = '<div class="empty-state">Could not load messages.</div>';
+    listEl.innerHTML = '<div class="empty-state">Could not load messages. The server may be unavailable. Try again shortly.</div>';
   }
 }
 
@@ -1746,7 +1746,15 @@ async function openDirectMessageThread(partnerUid){
   threadHeader.textContent = `Chat with ${partnerName}`;
   composerEl.style.display = 'flex';
 
-  const dmMessages = await loadDmFromApi(partnerUid);
+  let dmMessages;
+  try {
+    dmMessages = await loadDmFromApi(partnerUid);
+  } catch (error) {
+    console.error('Could not load DM thread', error);
+    messagesEl.innerHTML = '<div class="empty-state">Could not load this conversation. Please try again.</div>';
+    composerEl.style.display = 'none';
+    return;
+  }
   const messages = [];
   const convoId = getConversationId(auth.currentUser.uid, partnerUid);
 
@@ -1862,7 +1870,9 @@ document.getElementById('dmSearchBtn').onclick = async function(){
     console.error('Could not check ban status', e);
   }
 
-  const uid = await findUserByUsername(value);
+  let uid;
+  try { uid = await findUserByUsername(value); }
+  catch(error) { console.error('User search unavailable',error); document.getElementById('dmThreadHeader').textContent = 'Search unavailable. Please try again.'; return; }
   if(!uid){
     alert('User not found');
     return;
