@@ -220,6 +220,20 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
   scrollbar-width:thin;
 }
 </style>
+<style>
+/* Feed placeholders keep the layout stable while the authoritative API responds. */
+#posts.is-loading{min-height:330px}
+.feed-skeleton{pointer-events:none;overflow:hidden;position:relative}
+.feed-skeleton .sk{display:block;background:linear-gradient(100deg,#233752 20%,#344b68 40%,#233752 60%);background-size:220% 100%;animation:feedShimmer 1.6s ease-in-out infinite;border-radius:8px;height:13px;margin:12px 0}
+.feed-skeleton .sk-avatar{width:38px;height:38px;border-radius:50%;flex-shrink:0;margin:0}
+.feed-skeleton .sk-name{width:27%;margin:0}
+.feed-skeleton .sk-line{width:92%}
+.feed-skeleton .sk-short{width:57%}
+.feed-skeleton .sk-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+@keyframes feedShimmer{to{background-position-x:-220%}}
+@media(prefers-reduced-motion:reduce){.feed-skeleton .sk{animation:none}}
+#posts .post{content-visibility:auto;contain-intrinsic-size:auto 170px}
+</style>
 </head>
 <body>
 
@@ -638,6 +652,7 @@ async function ensureUsername(user){
 
 function showPostStatus(title, message) {
  const container = document.getElementById("posts");
+ container.classList.remove("is-loading");
  container.innerHTML = `
    <div class="post" style="animation-delay:0s;">
      <div><b>${escapeHtml(title)}</b></div>
@@ -646,11 +661,26 @@ function showPostStatus(title, message) {
    </div>`;
  updateLanguage();
 }
+function showFeedSkeleton(){
+ const container = document.getElementById("posts");
+ container.classList.add("is-loading");
+ container.setAttribute("aria-busy","true");
+ container.innerHTML = Array.from({length:3}, () => `
+   <div class="post feed-skeleton" aria-hidden="true" style="animation-delay:0s">
+     <div class="sk-head"><span class="sk sk-avatar"></span><span class="sk sk-name"></span></div>
+     <span class="sk sk-line"></span><span class="sk sk-short"></span>
+   </div>`).join("");
+}
+function finishFeedLoading(){
+ const container = document.getElementById("posts");
+ container.classList.remove("is-loading");
+ container.removeAttribute("aria-busy");
+}
 
 async function loadPosts(){
  const container = document.getElementById("posts");
  const viewerUid=auth.currentUser?.uid;
- showPostStatus("loading...", "loading posts, please wait...");
+ showFeedSkeleton();
  // Start the public feed request immediately; don't serialize it behind account/profile lookups.
  // Keep rendering gated on the existing verified account and moderation checks.
  const feedRequest = fetch("https://api.adamisbored.xyz/v1/forum/feed", {
@@ -821,7 +851,7 @@ async function loadPosts(){
      renderPost(postDoc, offset + index)));
    if(auth.currentUser?.uid !== viewerUid) return;
    const safePosts = rendered.filter(Boolean);
-   if(offset === 0) container.replaceChildren(...safePosts);
+   if(offset === 0) { container.replaceChildren(...safePosts); finishFeedLoading(); }
    else container.append(...safePosts);
    shown += safePosts.length;
    // Yield to the browser so it can paint before processing the next batch.
@@ -831,6 +861,7 @@ async function loadPosts(){
    }
  }
  if(auth.currentUser?.uid !== viewerUid) return;
+ finishFeedLoading();
  if(!shown) showPostStatus('no posts yet', 'Be the first to post!');
  else updateLanguage();
 }
