@@ -726,7 +726,9 @@ async function loadPosts(){
    }
    return authorProfiles.get(uid);
  }
- const postPromises = snap.docs.map(async (postDoc, postIndex) => {
+ // Render small batches so one slow author lookup cannot hold up the whole feed.
+ // Keep the existing per-author banned check before inserting any post.
+ const renderPost = async (postDoc, postIndex) => {
    const data = postDoc.data();
    const div = document.createElement("div");
    div.className = "post";
@@ -807,17 +809,30 @@ async function loadPosts(){
    }
 
    return div;
- });
+ };
 
- const renderedPosts=await Promise.all(postPromises);
- if(auth.currentUser?.uid!==viewerUid)return;
- container.replaceChildren(...renderedPosts.filter(Boolean));
- if(!renderedPosts.some(Boolean))showPostStatus('no posts yet', 'Be the first to post!');
- 
- // Always retranslate after posts load to ensure consistency
- setTimeout(() => {
-   updateLanguage();
- }, 50);
+ // Process in feed order, preserving moderation and account checks for each batch.
+ const batchSize = 12;
+ let shown = 0;
+ for(let offset = 0; offset < snap.docs.length; offset += batchSize){
+   if(auth.currentUser?.uid !== viewerUid) return;
+   const batch = snap.docs.slice(offset, offset + batchSize);
+   const rendered = await Promise.all(batch.map((postDoc, index) =>
+     renderPost(postDoc, offset + index)));
+   if(auth.currentUser?.uid !== viewerUid) return;
+   const safePosts = rendered.filter(Boolean);
+   if(offset === 0) container.replaceChildren(...safePosts);
+   else container.append(...safePosts);
+   shown += safePosts.length;
+   // Yield to the browser so it can paint before processing the next batch.
+   if(offset + batchSize < snap.docs.length){
+     updateLanguage();
+     await new Promise(resolve => requestAnimationFrame(() => resolve()));
+   }
+ }
+ if(auth.currentUser?.uid !== viewerUid) return;
+ if(!shown) showPostStatus('no posts yet', 'Be the first to post!');
+ else updateLanguage();
 }
 
 resetNameButton.onclick = async () => {
