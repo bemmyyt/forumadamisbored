@@ -233,6 +233,13 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
 @keyframes feedShimmer{to{background-position-x:-220%}}
 @media(prefers-reduced-motion:reduce){.feed-skeleton .sk{animation:none}}
 #posts .post{content-visibility:auto;contain-intrinsic-size:auto 170px}
+#posts.is-refreshing{position:relative}
+#posts.is-refreshing::before{content:"Refreshing posts…";position:sticky;top:8px;z-index:2;display:block;width:max-content;max-width:90%;margin:8px auto -34px;padding:7px 13px;border:1px solid #42658a;border-radius:999px;background:#162c46;color:#d5e9fc;font-size:12px;box-shadow:0 5px 20px #0005;pointer-events:none}
+#posts .post button{transition:transform .14s ease,filter .14s ease}
+@media(hover:hover){#posts .post button:hover{filter:brightness(1.14)}}
+#posts .post button:active{transform:scale(.97)}
+@media(prefers-reduced-motion:reduce){#posts .post button{transition:none}}
+
 </style>
 </head>
 <body>
@@ -652,7 +659,8 @@ async function ensureUsername(user){
 
 function showPostStatus(title, message) {
  const container = document.getElementById("posts");
- container.classList.remove("is-loading");
+ container.classList.remove("is-loading","is-refreshing");
+ container.removeAttribute("aria-busy");
  container.innerHTML = `
    <div class="post" style="animation-delay:0s;">
      <div><b>${escapeHtml(title)}</b></div>
@@ -663,6 +671,7 @@ function showPostStatus(title, message) {
 }
 function showFeedSkeleton(){
  const container = document.getElementById("posts");
+ container.classList.remove("is-refreshing");
  container.classList.add("is-loading");
  container.setAttribute("aria-busy","true");
  container.innerHTML = Array.from({length:3}, () => `
@@ -673,14 +682,21 @@ function showFeedSkeleton(){
 }
 function finishFeedLoading(){
  const container = document.getElementById("posts");
- container.classList.remove("is-loading");
+ container.classList.remove("is-loading","is-refreshing");
  container.removeAttribute("aria-busy");
 }
 
 async function loadPosts(){
  const container = document.getElementById("posts");
  const viewerUid=auth.currentUser?.uid;
- showFeedSkeleton();
+ // Keep already-approved posts on screen while refreshing, but never persist them to storage.
+ const refreshing = container.querySelector(".post:not(.feed-skeleton)") !== null &&
+   !container.classList.contains("is-loading");
+ const previousScrollTop = refreshing ? container.scrollTop : 0;
+ if(refreshing){
+   container.classList.add("is-refreshing");
+   container.setAttribute("aria-busy","true");
+ } else showFeedSkeleton();
  // Start the public feed request immediately; don't serialize it behind account/profile lookups.
  // Keep rendering gated on the existing verified account and moderation checks.
  const feedRequest = fetch("https://api.adamisbored.xyz/v1/forum/feed", {
@@ -851,7 +867,11 @@ async function loadPosts(){
      renderPost(postDoc, offset + index)));
    if(auth.currentUser?.uid !== viewerUid) return;
    const safePosts = rendered.filter(Boolean);
-   if(offset === 0) { container.replaceChildren(...safePosts); finishFeedLoading(); }
+   if(offset === 0) {
+     container.replaceChildren(...safePosts);
+     if(refreshing) container.scrollTop = previousScrollTop;
+     finishFeedLoading();
+   }
    else container.append(...safePosts);
    shown += safePosts.length;
    // Yield to the browser so it can paint before processing the next batch.
