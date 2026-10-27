@@ -238,6 +238,18 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
 #posts .post button{transition:transform .14s ease,filter .14s ease}
 @media(hover:hover){#posts .post button:hover{filter:brightness(1.14)}}
 #posts .post button:active{transform:scale(.97)}
+/* Small interaction refinements, without changing the forum's visual identity. */
+#posts{scrollbar-gutter:stable}
+#posts .post{scroll-margin-block:12px}
+#posts .post:focus-within{position:relative}
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible,
+select:focus-visible, #posts:focus-visible{
+  outline:2px solid #8bc4ff;
+  outline-offset:3px;
+}
+button:disabled{cursor:not-allowed;opacity:.65}
+@media(hover:hover){#posts .post a:hover{text-decoration:underline}}
+
 @media(prefers-reduced-motion:reduce){#posts .post button{transition:none}}
 
 </style>
