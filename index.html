@@ -660,6 +660,7 @@ async function ensureUsername(user){
 function showPostStatus(title, message) {
  const container = document.getElementById("posts");
  container.classList.remove("is-loading","is-refreshing");
+ container.dataset.feedReady = "false";
  container.removeAttribute("aria-busy");
  container.innerHTML = `
    <div class="post" style="animation-delay:0s;">
@@ -672,6 +673,7 @@ function showPostStatus(title, message) {
 function showFeedSkeleton(){
  const container = document.getElementById("posts");
  container.classList.remove("is-refreshing");
+ container.dataset.feedReady = "false";
  container.classList.add("is-loading");
  container.setAttribute("aria-busy","true");
  container.innerHTML = Array.from({length:3}, () => `
@@ -690,7 +692,7 @@ async function loadPosts(){
  const container = document.getElementById("posts");
  const viewerUid=auth.currentUser?.uid;
  // Keep already-approved posts on screen while refreshing, but never persist them to storage.
- const refreshing = container.querySelector(".post:not(.feed-skeleton)") !== null &&
+ const refreshing = container.dataset.feedReady === "true" &&
    !container.classList.contains("is-loading");
  const previousScrollTop = refreshing ? container.scrollTop : 0;
  if(refreshing){
@@ -715,6 +717,8 @@ async function loadPosts(){
      verifiedAccount = meDoc;
     if(meDoc?.banned){
        const banReason = meDoc.banReason || 'banned by moderator';
+       container.dataset.feedReady = "false";
+       finishFeedLoading();
        container.innerHTML = `
          <div class="post" style="animation-delay:0s;">
            <div><b>banned.</b></div>
@@ -869,6 +873,7 @@ async function loadPosts(){
    const safePosts = rendered.filter(Boolean);
    if(offset === 0) {
      container.replaceChildren(...safePosts);
+     container.dataset.feedReady = safePosts.length ? "true" : "false";
      if(refreshing) container.scrollTop = previousScrollTop;
      finishFeedLoading();
    }
