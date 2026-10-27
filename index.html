@@ -413,6 +413,48 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
  }
 })();
 </script>
+<style>
+/* Small, additive frontend refinements. */
+#posts{overflow-anchor:auto}
+.post img,.reply img{content-visibility:auto}
+button:focus-visible,a:focus-visible{outline:2px solid #92d9ff;outline-offset:3px}
+@media(hover:none){.post:hover{transform:none!important}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+<script>
+/* Local post drafts: no content is sent until Post is clicked. */
+(() => {
+  const input = document.getElementById('postInput');
+  const button = document.getElementById('postBtn');
+  if(!input || !button) return;
+  const key = 'forum:post-draft:v1';
+  try {
+    const draft = sessionStorage.getItem(key);
+    if(draft && !input.value) {
+      input.value = draft.slice(0, input.maxLength || 2000);
+      input.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+  } catch {}
+  input.addEventListener('input', () => {
+    try {
+      if(input.value) sessionStorage.setItem(key,input.value);
+      else sessionStorage.removeItem(key);
+    } catch {}
+  });
+  document.addEventListener('keydown', event => {
+    if(event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || event.repeat) return;
+    const target = event.target;
+    const typing = target instanceof HTMLElement &&
+      (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+    if(!typing && event.key.toLowerCase() === 'n' &&
+       !document.querySelector('.popup[style*="block"]') &&
+       getComputedStyle(document.getElementById('dmPanel')).display === 'none') {
+      event.preventDefault();
+      input.focus();
+    }
+  });
+})();
+</script>
 <script type="module">
 const firebaseConfig = {
   apiKey: "AIzaSyA6kVGxsYBUBsOQrVKsk6n29xM3yrJhcOs",
@@ -495,14 +537,25 @@ async function isSevereToxic(text){
   );
 }
 
+// Share simultaneous account lookups, without caching account permissions long-term.
+let accountRequest = null;
+let accountRequestUid = null;
 async function getMyForumAccount(){
-  if(!auth.currentUser) return null;
-  const token = await auth.currentUser.getIdToken();
-  const response = await fetch("https://api.adamisbored.xyz/v1/forum/me",{
-    headers:{"Authorization":"Bearer "+token},cache:"no-store"
-  });
-  if(!response.ok) throw new Error("Account API unavailable ("+response.status+")");
-  return response.json();
+  const user = auth.currentUser;
+  if(!user) return null;
+  if(accountRequest && accountRequestUid === user.uid) return accountRequest;
+  accountRequestUid = user.uid;
+  const request = (async () => {
+    const token = await user.getIdToken();
+    const response = await fetch("https://api.adamisbored.xyz/v1/forum/me",{
+      headers:{"Authorization":"Bearer "+token},cache:"no-store"
+    });
+    if(!response.ok) throw new Error("Account API unavailable ("+response.status+")");
+    return response.json();
+  })();
+  accountRequest = request;
+  try { return await request; }
+  finally { if(accountRequest === request) accountRequest = null; }
 }
 async function getPublicForumProfile(uid){
   if(!uid || !/^[a-zA-Z0-9]{1,128}$/.test(uid)) return null;
