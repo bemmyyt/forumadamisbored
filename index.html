@@ -1569,6 +1569,24 @@ setTimeout(() => {
     }
 }
 
+ // Show a clearly pending preview before token retrieval, moderation and the API round trip.
+ // The server remains authoritative; this is never treated as a published post.
+ const pendingCard = document.createElement("div");
+ pendingCard.className = "post";
+ pendingCard.style.animationDelay = "0s";
+ const pendingAuthor = document.createElement("b");
+ pendingAuthor.textContent = username;
+ const pendingText = document.createElement("div");
+ pendingText.style.margin = "8px 0";
+ pendingText.textContent = text;
+ const pendingMeta = document.createElement("div");
+ pendingMeta.className = "meta";
+ pendingMeta.textContent = "sending…";
+ pendingCard.append(pendingAuthor, pendingText, pendingMeta);
+ const postsContainer = document.getElementById("posts");
+ postsContainer.prepend(pendingCard);
+ postsContainer.scrollTop = 0;
+ postBtn.disabled = true;
  try {
    if(bannedUsernames.some(word => username.toLowerCase().includes(word))){
      throw new Error("your username is not allowed on this forum");
@@ -1597,7 +1615,9 @@ setTimeout(() => {
      const detail = await response.json().catch(()=>({}));
      throw new Error(detail.error || "Posting failed ("+response.status+")");
    }
+   pendingMeta.textContent = "sent · updating feed…";
  } catch (error) {
+   postBtn.disabled = false;
    document.getElementById("posts").innerHTML = `
      <div class="post">
        <b>message not posted</b>
@@ -1609,32 +1629,10 @@ setTimeout(() => {
 
 
 postInput.value = "";
-
-console.log("previewing message")
-console.log("posting")
-  // include avatar from profile in preview
-  let previewAvatar = 'https://www.gravatar.com/avatar/?d=mp&s=80';
-  try{
-    const prof = await getPublicForumProfile(auth.currentUser.uid);
-    if(prof) previewAvatar = safeAvatarUrl(prof.avatar, previewAvatar);
-  }catch(e){console.error(e)}
-
-document.getElementById("posts").innerHTML = `
-  <div class="post" style="animation-delay:0s;">
-    <div style="display:flex;align-items:center">
-      <img src="${safeAvatarUrl(previewAvatar, "https://www.gravatar.com/avatar/?d=mp&s=80")}" class="avatar" alt="avatar">
-      <div style="margin-left:8px"><b>${escapeHtml(username)}</b></div>
-    </div>
-    <div style="margin:8px 0">${escapeHtml(text)}</div>
-    <div class="meta">[message preview] posting in progress...</div>
-  </div>
-`;
-
-
+postBtn.disabled = false;
 setTimeout(() => {
-    loadPosts();
-    console.log("loading posts")
-}, 1000);
+  loadPosts();
+}, 350);
 
 };
 
