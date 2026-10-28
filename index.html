@@ -1583,7 +1583,7 @@ setTimeout(() => {
    <div style="margin:8px 0">${escapeHtml(text)}</div>
    <div class="meta">[message preview] posting in progress...</div>
  `;
- postsContainer.prepend(pendingCard);
+ postsContainer.replaceChildren(pendingCard);
  postsContainer.scrollTop = 0;
  // Fill in the avatar asynchronously; never delay the preview or submission.
  getPublicForumProfile(user.uid).then(prof => {
@@ -1621,15 +1621,11 @@ setTimeout(() => {
      throw new Error(detail.error || "Posting failed ("+response.status+")");
    }
    const previewStatus = pendingCard.querySelector(".meta");
-   if(previewStatus) previewStatus.textContent = "[message preview] posted successfully";
+
  } catch (error) {
    postBtn.disabled = false;
-   document.getElementById("posts").innerHTML = `
-     <div class="post">
-       <b>message not posted</b>
-       <div style="margin:8px 0">${escapeHtml(error.message || "mod unavailable")}</div>
-     </div>
-   `;
+   const previewStatus = pendingCard.querySelector(".meta");
+   if(previewStatus) previewStatus.textContent = "message not posted: " + (error.message || "please try again");
    return;
  }
 
