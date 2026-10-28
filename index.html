@@ -252,6 +252,100 @@ button:disabled{cursor:not-allowed;opacity:.65}
 @media(prefers-reduced-motion:reduce){#posts .post button{transition:none}}
 
 </style>
+
+<style>
+/* Mobile-only layout improvements; desktop appearance and API behavior are unchanged. */
+html{overflow-x:clip}
+body{box-sizing:border-box}
+.post,.reply,.popup-content,.dm-panel{min-width:0}
+.post,.reply,.dm-bubble,.profile-bio{overflow-wrap:anywhere}
+.post img,.reply img,.profile-bio img{max-width:100%;height:auto}
+@media(max-width:700px){
+  body{width:100%;max-width:100%;padding:20px 14px 40px!important;overflow-x:clip}
+  h1{font-size:clamp(42px,13vw,64px);margin-bottom:16px}
+  h2{font-size:23px}
+  .development-note{max-width:100%;box-sizing:border-box;line-height:1.5}
+  #status{box-sizing:border-box}
+  #postInput{width:100%;max-width:100%!important;display:block;margin:0 0 8px;min-height:48px;font-size:16px!important}
+  #postBtn{margin:0 8px 0 0;min-width:90px}
+  #postHint{display:inline-block;vertical-align:middle;margin:4px 0}
+  #posts{max-height:none;overflow-y:visible;scrollbar-gutter:auto}
+  #posts .post{content-visibility:visible;contain-intrinsic-size:none}
+  .post{padding:15px!important;margin:12px 0!important}
+  .post:hover{transform:none!important}
+  .post .avatar{width:40px;height:40px;flex-shrink:0}
+  .replies{margin-left:8px!important;padding-left:8px}
+  .reply{padding:10px!important}
+  .reply-input{display:flex;flex-wrap:wrap;gap:8px}
+  .reply-input input{flex:1 1 160px;width:100%;font-size:16px!important}
+  button{min-height:44px;max-width:100%;white-space:normal}
+  input,textarea{max-width:100%;font-size:16px!important}
+  .popup{padding:12px!important;box-sizing:border-box;overflow-y:auto}
+  .popup-content{position:relative;top:auto;left:auto;transform:none!important;
+    animation:none!important;opacity:1!important;width:100%!important;max-width:100%!important;
+    max-height:calc(100dvh - 24px);margin:auto;padding:18px!important;box-sizing:border-box;overflow-y:auto}
+  #accountMenu .popup-content input{width:100%;display:block;margin:8px 0}
+  #accountMenu .popup-content button{margin:4px 4px 4px 0}
+  #policyMenu .policy-content{width:100%;max-height:calc(100dvh - 24px)}
+  #profilePopup .popup-content{max-width:100%}
+  .profile-header{flex-wrap:wrap;gap:10px}
+  .profile-header .avatar{width:64px;height:64px}
+  #adminPanel{padding:14px!important}
+  #adminPanel input{width:100%}
+  .dm-panel{inset:0!important;border:0!important;border-radius:0!important;height:100dvh;max-height:100dvh}
+  .dm-header{min-height:60px;box-sizing:border-box;padding:10px 14px;gap:8px}
+  .dm-header h3{font-size:18px;min-width:0}
+  .dm-layout{height:calc(100% - 60px);min-height:0;display:flex;flex-direction:column}
+  .dm-sidebar{flex:1 1 auto;width:100%;max-height:none!important;min-height:0;overflow-y:auto;
+    border-right:0;border-bottom:0;padding:12px}
+  .dm-sidebar input{min-width:0;width:100%;font-size:16px!important}
+  .dm-thread{display:none;flex:1 1 auto;min-height:0;overflow:hidden}
+  .dm-panel.mobile-thread-open .dm-sidebar{display:none}
+  .dm-panel.mobile-thread-open .dm-thread{display:flex}
+  .dm-thread-header{display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 12px}
+  #mobileDmBack{flex-shrink:0;padding:7px 11px!important;min-height:40px}
+  .dm-messages{min-height:0;overscroll-behavior:contain;padding:12px}
+  .dm-bubble{max-width:88%}
+  .dm-composer{gap:6px;padding:8px;box-sizing:border-box}
+  .dm-composer input{min-width:0;flex:1 1 0;width:0;font-size:16px!important}
+  .dm-composer button{flex-shrink:0;padding:8px 12px!important}
+}
+@media(min-width:701px){#mobileDmBack{display:none!important}}
+@media(max-width:360px){
+  body{padding-inline:10px!important}
+  .post{padding:12px!important}
+  .dm-header{padding-inline:10px}
+}
+@media(prefers-reduced-motion:reduce){.dm-panel,.dm-sidebar,.dm-thread{transition:none!important}}
+</style>
+<script>
+/* Mobile DM navigation: show conversations first, then the selected thread. */
+document.addEventListener('DOMContentLoaded',()=>{
+  const panel=document.getElementById('dmPanel');
+  const header=document.getElementById('dmThreadHeader');
+  const sidebar=document.getElementById('dmConversationList');
+  if(!panel||!header||!sidebar)return;
+  const back=document.createElement('button');
+  back.id='mobileDmBack';
+  back.type='button';
+  back.textContent='‹ Back';
+  back.setAttribute('aria-label','Back to conversations');
+  header.prepend(back);
+  back.addEventListener('click',()=>panel.classList.remove('mobile-thread-open'));
+  sidebar.addEventListener('click',event=>{
+    if(event.target.closest('.dm-thread-item') && matchMedia('(max-width:700px)').matches){
+      panel.classList.add('mobile-thread-open');
+    }
+  });
+  document.getElementById('openDmBtn')?.addEventListener('click',()=>{
+    if(matchMedia('(max-width:700px)').matches)panel.classList.remove('mobile-thread-open');
+  });
+  document.getElementById('closeDmBtn')?.addEventListener('click',()=>panel.classList.remove('mobile-thread-open'));
+  window.addEventListener('resize',()=>{
+    if(!matchMedia('(max-width:700px)').matches)panel.classList.remove('mobile-thread-open');
+  });
+});
+</script>
 </head>
 <body>
 
