@@ -234,7 +234,6 @@ a{color:#8cc7ff}a:hover{color:#c1e3ff}
 @media(prefers-reduced-motion:reduce){.feed-skeleton .sk{animation:none}}
 #posts .post{content-visibility:auto;contain-intrinsic-size:auto 170px}
 #posts.is-refreshing{position:relative}
-#posts.is-refreshing::before{content:"Refreshing posts…";position:sticky;top:8px;z-index:2;display:block;width:max-content;max-width:90%;margin:8px auto -34px;padding:7px 13px;border:1px solid #42658a;border-radius:999px;background:#162c46;color:#d5e9fc;font-size:12px;box-shadow:0 5px 20px #0005;pointer-events:none}
 #posts .post button{transition:transform .14s ease,filter .14s ease}
 @media(hover:hover){#posts .post button:hover{filter:brightness(1.14)}}
 #posts .post button:active{transform:scale(.97)}
@@ -1571,21 +1570,27 @@ setTimeout(() => {
 
  // Show a clearly pending preview before token retrieval, moderation and the API round trip.
  // The server remains authoritative; this is never treated as a published post.
+ const previewAvatar = "https://www.gravatar.com/avatar/?d=mp&s=80";
+ const postsContainer = document.getElementById("posts");
  const pendingCard = document.createElement("div");
  pendingCard.className = "post";
  pendingCard.style.animationDelay = "0s";
- const pendingAuthor = document.createElement("b");
- pendingAuthor.textContent = username;
- const pendingText = document.createElement("div");
- pendingText.style.margin = "8px 0";
- pendingText.textContent = text;
- const pendingMeta = document.createElement("div");
- pendingMeta.className = "meta";
- pendingMeta.textContent = "sending…";
- pendingCard.append(pendingAuthor, pendingText, pendingMeta);
- const postsContainer = document.getElementById("posts");
+ pendingCard.innerHTML = `
+   <div style="display:flex;align-items:center">
+     <img src="${safeAvatarUrl(previewAvatar, previewAvatar)}" class="avatar" alt="avatar">
+     <div style="margin-left:8px"><b>${escapeHtml(username)}</b></div>
+   </div>
+   <div style="margin:8px 0">${escapeHtml(text)}</div>
+   <div class="meta">[message preview] posting in progress...</div>
+ `;
  postsContainer.prepend(pendingCard);
  postsContainer.scrollTop = 0;
+ // Fill in the avatar asynchronously; never delay the preview or submission.
+ getPublicForumProfile(user.uid).then(prof => {
+   if(prof && pendingCard.isConnected){
+     pendingCard.querySelector("img.avatar").src = safeAvatarUrl(prof.avatar, previewAvatar);
+   }
+ }).catch(() => {});
  postBtn.disabled = true;
  try {
    if(bannedUsernames.some(word => username.toLowerCase().includes(word))){
@@ -1615,7 +1620,8 @@ setTimeout(() => {
      const detail = await response.json().catch(()=>({}));
      throw new Error(detail.error || "Posting failed ("+response.status+")");
    }
-   pendingMeta.textContent = "sent · updating feed…";
+   const previewStatus = pendingCard.querySelector(".meta");
+   if(previewStatus) previewStatus.textContent = "[message preview] posted successfully";
  } catch (error) {
    postBtn.disabled = false;
    document.getElementById("posts").innerHTML = `
